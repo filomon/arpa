@@ -1,7 +1,7 @@
 <link rel="import" href="../arpa-app-elements/arpa-elements.html">
 <link rel="import" href="../polymerfire/polymerfire.html">
 
-<dom-module id="arpa-admin-board">
+<dom-module id="arpa-notes-example">
     <template>
         <style include="arpa-app-shared-styles"></style>
         <paper-fab icon="add" on-tap="create" disabled="[[!online]]" aria-label="Add note"></paper-fab>
@@ -21,7 +21,7 @@
     </template>
     <script>
         Polymer({
-            is: 'arpa-admin-board',
+            is: 'arpa-notes-example',
 
             properties: {
                 signedIn: {
