@@ -1,0 +1,161 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="bower_components/app-storage/app-network-status-behavior.html">
+<link rel="import" href="bower_components/app-layout/app-layout.html">
+<link rel="import" href="bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="bower_components/paper-item/paper-item.html">
+<link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="bower_components/arpa-app-elements/arpa-elements.html">
+<link rel="import" href="bower_components/arpa-admin-board/arpa-admin-board.html">
+<link rel="import" href="bower_components/arpa-search-element/arpa-search-element.html">
+<link rel="import" href="bower_components/arpa-app-elements/arpa-elements.html">
+
+<dom-module id="arpa-app">
+    <template>
+        <style include="arpa-app-shared-styles">
+            app-drawer {
+                z-index: 2;
+            }
+
+            app-toolbar {
+                background-color: var(--paper-green-500);
+            }
+
+            app-drawer paper-item, app-drawer paper-item iron-icon, app-drawer paper-item label {
+                cursor: pointer;
+            }
+
+            app-drawer paper-item label {
+                margin: 0 10px 0 10px;
+            }
+
+            .login-status {
+                color: black;
+                cursor: pointer;
+            }
+
+            .user-icon-container {
+                float: right;
+                margin-right: 10px;
+                font-size: 14px;
+                vertical-align: middle;
+                font-family: sans-serif;
+            }
+
+            .user-icon {
+                max-height: 25px;
+                margin: 0 5px 0 5px;
+                vertical-align: middle;
+            }
+        </style>
+        <firebase-auth id="auth" app-name="arpa-app" provider="google" signed-in="{{signedIn}}" user="{{user}}"></firebase-auth>
+        <app-header reveals>
+            <app-toolbar>
+                <paper-icon-button icon="menu" on-tap="_drawerToggle"></paper-icon-button>
+                <div main-title>ARPA</div>
+                <div class="user-icon-container" hidden$="[[!signedIn]]">
+                    <label>{{_getUserName(user)}}</label>
+                    <img class="user-icon" src="[[_getUserIcon(user)]]"/>
+                </div>
+                <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
+                <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
+                <paper-icon-button class="login-status"
+                                   title="[[_computeLockTitle(signedIn)]]"
+                                   icon="[[_computeLockIcon(signedIn)]]"
+                                   on-tap="_switchLoginStatus">
+                </paper-icon-button>
+            </app-toolbar>
+        </app-header>
+        <app-drawer id="drawer" swipe-open>
+            <paper-listbox attr-for-selected="item-name" selected="{{page}}" fallback-selection="None">
+                <paper-item item-name="search-element" on-tap="_drawerClose">
+                    <iron-icon icon="search"></iron-icon>
+                    <label>Search</label>
+                </paper-item>
+                <template is="dom-if" if="{{signedIn}}">
+                    <paper-item item-name="admin-board" on-tap="_drawerClose">
+                        <iron-icon icon="work"></iron-icon>
+                        <label>Admin Board</label>
+                    </paper-item>
+                    <paper-item item-name="user-roles" on-tap="_drawerClose">
+                        <iron-icon icon="work"></iron-icon>
+                        <label>User Roles</label>
+                    </paper-item>
+                    <paper-item item-name="my-company" on-tap="_drawerClose">
+                        <iron-icon icon="work"></iron-icon>
+                        <label>My Company</label>
+                    </paper-item>
+                    <paper-item item-name="my-routes" on-tap="_drawerClose">
+                        <iron-icon icon="work"></iron-icon>
+                        <label>My Routes</label>
+                    </paper-item>
+                </template>
+            </paper-listbox>
+        </app-drawer>
+        <iron-pages role="main" selected="{{page}}" attr-for-selected="name" selected-attribute="visible" hidden$="[[!online]]">
+            <arpa-search-element id="search_element" name="search-element"></arpa-search-element>
+            <arpa-admin-board id="admin_board" name="admin-board" user="{{user}}" signed-in="{{signedIn}}"
+                              online="{{online}}" hidden$="[[!signedIn]]"></arpa-admin-board>
+        </iron-pages>
+
+    </template>
+    <script>
+        Polymer({
+            is: 'arpa-app',
+
+            properties: {
+                page: {
+                    type: String,
+                    notify: true,
+                    value: "search-element"
+                }
+            },
+
+            behaviors: [Polymer.ArpaAppBehavior],
+
+            _computeLockIcon: function (_signedIn) {
+                return _signedIn ? 'lock-open' : 'lock';
+            },
+
+            _computeLockTitle: function (_signedIn) {
+                return _signedIn ? 'Logout' : 'Login';
+            },
+
+            _isLoginRequired: function (_page) {
+                return _page === "admin-board";
+            },
+
+            _drawerToggle: function (_event) {
+                this.$.drawer.toggle();
+            },
+
+            _drawerClose: function (_event) {
+                this.$.drawer.close();
+            },
+
+            _switchLoginStatus: function () {
+                console.log("this.signedIn", this.signedIn);
+                if (this.signedIn) {
+                    this.$.auth.signOut();
+                } else {
+                    this.$.auth.signInWithPopup();
+                }
+            },
+
+            _getUserIcon: function (_user) {
+                console.log("_user", _user);
+                return _user && _user.photoURL ? _user.photoURL : "./bower_components/arpa-app-elements/images/icon-1x.png";
+            },
+
+            _getUserName: function (_user) {
+                return _user ? _user.displayName : "";
+            }
+        });
+    </script>
+</dom-module>

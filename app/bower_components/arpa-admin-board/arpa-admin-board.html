@@ -1,0 +1,54 @@
+<link rel="import" href="../arpa-app-elements/arpa-elements.html">
+<link rel="import" href="../polymerfire/polymerfire.html">
+
+<dom-module id="arpa-admin-board">
+    <template>
+        <style include="arpa-app-shared-styles"></style>
+        <paper-fab icon="add" on-tap="create" disabled="[[!online]]" aria-label="Add note"></paper-fab>
+        <arpa-editor id="editor" note="{{editableNote}}" on-close="commitChange"></arpa-editor>
+        <firebase-document id="document" app-name="arpa-app" path="[[editableNoteId]]" data="{{editableNote}}"></firebase-document>
+        <firebase-query id="query" app-name="arpa-app" path="/notes/[[user.uid]]" data="{{notes}}"></firebase-query>
+        <div class="notes">
+            <template is="dom-repeat" items="[[notes]]" as="note">
+                <arpa-note
+                        id$="[[note.$key]]"
+                        title="[[note.title]]"
+                        body="[[note.body]]"
+                        on-tap="edit">
+                </arpa-note>
+            </template>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: 'arpa-admin-board',
+
+            properties: {
+                signedIn: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                },
+                online: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
+                }
+            },
+
+            behaviors: [Polymer.ArpaAppBehavior],
+
+            get notesPath() {
+                return '/notes/' + this.user.uid;
+            },
+
+            toEditableId: function (_noteId) {
+                return this.notesPath + '/' + _noteId;
+            },
+
+            get isEditable() {
+                return this.online;
+            }
+        });
+    </script>
+</dom-module>
