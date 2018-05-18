@@ -1,9 +1,14 @@
 <link rel="import" href="bower_components/polymer/polymer.html">
 <link rel="import" href="bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="bower_components/app-route/app-location.html">
+<link rel="import" href="bower_components/app-route/app-route.html">
 <link rel="import" href="bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="bower_components/app-storage/app-network-status-behavior.html">
 <link rel="import" href="bower_components/app-layout/app-layout.html">
 <link rel="import" href="bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="bower_components/iron-icons/social-icons.html">
+<link rel="import" href="bower_components/iron-icons/maps-icons.html">
+<link rel="import" href="bower_components/iron-icons/communication-icons.html">
 <link rel="import" href="bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="bower_components/iron-pages/iron-pages.html">
@@ -73,35 +78,62 @@
             </app-toolbar>
         </app-header>
         <app-drawer id="drawer" swipe-open>
-            <paper-listbox attr-for-selected="item-name" selected="{{page}}" fallback-selection="None">
-                <paper-item item-name="search-element" on-tap="_drawerClose">
+            <paper-listbox attr-for-selected="value" selected="{{routeData.page}}" fallback-selection="search-element">
+                <paper-item value="search-element" on-tap="_drawerClose">
                     <iron-icon icon="search"></iron-icon>
-                    <label>Search</label>
+                    <label>Buscar</label>
                 </paper-item>
                 <template is="dom-if" if="{{signedIn}}">
-                    <paper-item item-name="admin-board" on-tap="_drawerClose">
+                    <paper-item value="admin-board" on-tap="_drawerClose">
                         <iron-icon icon="work"></iron-icon>
-                        <label>Admin Board</label>
+                        <label>Notes Example</label>
                     </paper-item>
-                    <paper-item item-name="user-roles" on-tap="_drawerClose">
-                        <iron-icon icon="work"></iron-icon>
-                        <label>User Roles</label>
+                    <paper-item value="user-roles" on-tap="_drawerClose">
+                        <iron-icon icon="social:group"></iron-icon>
+                        <label>Roles de Usuario</label>
                     </paper-item>
-                    <paper-item item-name="my-company" on-tap="_drawerClose">
-                        <iron-icon icon="work"></iron-icon>
-                        <label>My Company</label>
+                    <paper-item value="bus-models" on-tap="_drawerClose">
+                        <iron-icon icon="maps:directions-bus"></iron-icon>
+                        <label>Modelos de Buses</label>
                     </paper-item>
-                    <paper-item item-name="my-routes" on-tap="_drawerClose">
-                        <iron-icon icon="work"></iron-icon>
-                        <label>My Routes</label>
+                    <paper-item value="my-routes" on-tap="_drawerClose">
+                        <iron-icon icon="maps:directions"></iron-icon>
+                        <label>Itinerarios</label>
+                    </paper-item>
+                    <paper-item value="my-company" on-tap="_drawerClose">
+                        <iron-icon icon="communication:contacts"></iron-icon>
+                        <label>Mi Compania</label>
                     </paper-item>
                 </template>
             </paper-listbox>
         </app-drawer>
-        <iron-pages role="main" selected="{{page}}" attr-for-selected="name" selected-attribute="visible" hidden$="[[!online]]">
-            <arpa-search-element id="search_element" name="search-element"></arpa-search-element>
-            <arpa-admin-board id="admin_board" name="admin-board" user="{{user}}" signed-in="{{signedIn}}"
-                              online="{{online}}" hidden$="[[!signedIn]]"></arpa-admin-board>
+        <app-location route="{{route}}"></app-location>
+        <app-route route="{{route}}"
+                   pattern="/:page"
+                   data="{{routeData}}"
+                   tail="{{subroute}}">
+        </app-route>
+        <app-route route="{{subroute}}"
+                   pattern="/:id"
+                   data="{{subrouteData}}">
+        </app-route>
+        <iron-pages role="main"
+                    selected="[[routeData.page]]"
+                    attr-for-selected="name"
+                    selected-attribute="visible"
+                    hidden$="[[!online]]">
+            <arpa-search-element id="search_element"
+                                 name="search-element"
+                                 route="{{subroute}}">
+            </arpa-search-element>
+            <arpa-admin-board id="admin_board"
+                              name="admin-board"
+                              route="{{subroute}}"
+                              user="{{user}}"
+                              signed-in="{{signedIn}}"
+                              online="{{online}}"
+                              hidden$="[[!signedIn]]">
+            </arpa-admin-board>
         </iron-pages>
 
     </template>
@@ -110,7 +142,7 @@
             is: 'arpa-app',
 
             properties: {
-                page: {
+                routeData: {
                     type: String,
                     notify: true,
                     value: "search-element"
