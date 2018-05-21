@@ -113,10 +113,6 @@
                    data="{{routeData}}"
                    tail="{{subroute}}">
         </app-route>
-        <app-route route="{{subroute}}"
-                   pattern="/:id"
-                   data="{{subrouteData}}">
-        </app-route>
         <iron-pages role="main"
                     selected="[[routeData.page]]"
                     attr-for-selected="name"
@@ -126,7 +122,7 @@
                                  name="search-element"
                                  route="{{subroute}}">
             </arpa-search-element>
-            <arpa-notes-example id="admin_board"
+            <arpa-notes-example id="notes-example"
                               name="notes-example"
                               route="{{subroute}}"
                               user="{{user}}"
