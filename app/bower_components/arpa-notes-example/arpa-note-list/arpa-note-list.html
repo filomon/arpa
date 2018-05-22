@@ -1,8 +1,7 @@
 <link rel="import" href="../../arpa-app-elements/arpa-elements.html">
 <link rel="import" href="../../polymerfire/polymerfire.html">
 <link rel="import" href="../../iron-list/iron-list.html">
-<link rel="import" href="../../app-route/app-location.html">
-<link rel="import" href="../../app-route/app-route.html">
+<link rel="import" href="../../arpa-app-elements/arpa-common-behaviors.html">
 
 <dom-module id="arpa-note-list">
     <template>
@@ -11,17 +10,18 @@
         <paper-fab icon="add" on-tap="create" disabled="[[!online]]" aria-label="Add note"></paper-fab>
         <firebase-query id="query" app-name="arpa-app" path="/notes/user_[[user.uid]]" data="{{notes}}"></firebase-query>
         <div class="page-content">
+            <h3>[[es.message.note_list_title]]</h3>
             <iron-list id="main_list" class="data-list" items="[[notes]]" as="note" scroll-target="document">
                 <template>
                     <div>
-                        <div class="item" tabindex$="[[tabIndex]]" id$="[[note.$key]]">
+                        <div class="item" tabindex$="[[tabIndex]]">
                             <!-- Uncomment if there is a image associated to a record -->
                             <!--<iron-image class="logo" sizing="contain" src="[[item.logo]]"></iron-image>-->
                             <div class="pad">
                                 <div class="primary">[[note.title]]</div>
                                 <div class="secondary dim">[[note.body]]</div>
                             </div>
-                            <paper-button id$="[[note.$key]]" on-tap="edit">edit</paper-button>
+                            <paper-button on-tap="edit">edit</paper-button>
                         </div>
                     </div>
                 </template>
@@ -37,6 +37,11 @@
 
             behaviors: [Polymer.ArpaMessages, Polymer.ArpaCore],
 
+
+            edit: function(_event) {
+                console.log("_event", _event);
+                this.fire('change-view', {mode: "EDIT", noteId: _event.model.note.$key, view:"form"});
+            },
 
             create: function(_event) {
                 this.fire('change-view', {mode: "ADD", noteId: null, view:"form"});

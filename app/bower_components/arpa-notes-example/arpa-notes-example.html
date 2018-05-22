@@ -68,8 +68,17 @@
 
             changeView: function(_event, _params) {
                 console.log("_params", _params);
-                this.mode = _params.mode;
-                this.noteId = _params.noteId;
+//                this.noteId = _params.noteId;
+//                this.mode = _params.mode;
+                if (_params.view === "list") {
+                    if (this.$.list.$.query && this.$.list.$.query.refresh) {
+                        this.$.list.$.query.refresh().then(function() {
+                        }.bind(this));
+                    }
+                }
+                if (_params.view === "form") {
+                    this.$.form.setupData(_params.mode, _params.noteId);
+                }
                 this.set("routeData.view", _params.view);
             }
         });
