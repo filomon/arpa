@@ -29,14 +29,20 @@
                 }
             }
         };
+
         /**
-         * @polymerBehavior Polymer.ArpaCore
+         * @polymerBehavior Polymer.ArpaCoreModel
          */
-        Polymer.ArpaCore = {
+        Polymer.ArpaCoreModel = {
             properties: {
                 user: {
                     type: Object,
                     value: {},
+                    notify: true
+                },
+                accessToken: {
+                    type: String,
+                    value: null,
                     notify: true
                 },
                 signedIn: {
@@ -49,8 +55,22 @@
                     value: false,
                     notify: true
                 }
+            }
+        };
+
+        /**
+         * @polymerBehavior Polymer.ArpaForms
+         */
+        Polymer.ArpaForms = {
+            cloneObject: function (_object) {
+                return JSON.parse(JSON.stringify(_object));
             },
-            validateFields: function (_fieldIds) {
+            toEditableObject: function (_object) {
+                var clonedObj = this.cloneObject(_object);
+                delete clonedObj["$id"];
+                return clonedObj;
+            },
+            performFieldsValidation: function (_fieldIds) {
                 var valid = true;
                 for (var i = 0; i < _fieldIds.length; i++) {
                     this.$[_fieldIds[i]].validate();
@@ -60,19 +80,16 @@
                 }
                 return valid;
             },
-            cleanFields: function (_fieldIds) {
+            clearFieldsValidation: function (_fieldIds, _clearFields) {
                 for (var i = 0; i < _fieldIds.length; i++) {
-                    console.log("this.$[_fieldIds[i]]", this.$[_fieldIds[i]]);
-                    console.log("this.$[_fieldIds[i]].invalid", this.$[_fieldIds[i]].invalid);
                     if (this.$[_fieldIds[i]]) {
-                        if (this.$[_fieldIds[i]].clear) {
+                        if (_clearFields && this.$[_fieldIds[i]].clear) {
                             this.$[_fieldIds[i]].clear();
                         }
                         this.$[_fieldIds[i]].invalid = false;
                     } else {
                         console.log("Field not found: " + _fieldIds[i]);
                     }
-                    console.log("this.$[_fieldIds[i]].invalid", this.$[_fieldIds[i]].invalid);
                 }
             },
             setPropertiesFromEntity: function (_objectName, _propertyNames) {
@@ -98,6 +115,27 @@
                         jsonObject[propertyName] = propertyValue;
                     }
                 }
+            }
+        };
+
+        /**
+         * @polymerBehavior Polymer.ArpaCollections
+         */
+        Polymer.ArpaCollections = {
+            queryResultsToArrayObject: function (_queryResult) {
+                var resultArray = [];
+                if (_queryResult) {
+                    for (var key in _queryResult) {
+                        if (_queryResult.hasOwnProperty(key)) {
+                            if (typeof _queryResult[key] === "object") {
+                                var jsonObject = _queryResult[key];
+                                jsonObject["$id"] = key;
+                                resultArray.push(jsonObject);
+                            }
+                        }
+                    }
+                }
+                return resultArray;
             }
         };
     })();

@@ -7,15 +7,6 @@
 <dom-module id="arpa-note-form">
     <template>
         <style include="arpa-app-shared-styles"></style>
-        <firebase-query id="query"
-                        app-name="arpa-app"
-                        path="[[editableNotePath]]"
-                        data="{{note}}"></firebase-query>
-        <firebase-document id="document"
-                           app-name="arpa-app"
-                           path="/notes/user_[[user.uid]]"
-                           data="{{note}}"></firebase-document>
-
         <div class="page-content">
             <h3>[[getPageTitle(mode)]]</h3>
             <div class="form-content">
@@ -81,10 +72,10 @@
                 }
             },
 
-            behaviors: [Polymer.ArpaMessages, Polymer.ArpaCore],
+            behaviors: [Polymer.ArpaMessages, Polymer.ArpaCoreModel, Polymer.ArpaForms],
 
             observers: [
-//                'setupData(mode, noteId)'
+//                'setup(mode, noteId)'
             ],
 
             isNoneMode: function (_mode) {
@@ -100,76 +91,70 @@
             },
 
             getPageTitle: function (_mode) {
-                return this.isEditMode(_mode) ? this.es.message.note_edit_title :  this.isAddMode(_mode) ? this.es.message.note_add_title : "";
+                return this.isEditMode(_mode) ? this.es.message.note_edit_title : this.isAddMode(_mode) ? this.es.message.note_add_title : "";
             },
 
-            setupData: function (_mode, _noteId) {
+            setup: function (_mode, _note) {
                 this.mode = _mode;
-                this.noteId = _noteId;
-                console.log("_mode", _mode);
-                console.log("_noteId", _noteId);
-                console.log("_noteId",this.noteId);
                 //Setup default values
-                this.set("note", {title: "", body: ""});
-                if (this.isNoneMode(_mode)) {
-                    this.editableNotePath = "";
-                    this.$.document.reset();
-                } else if (this.isEditMode(_mode)) {
-                    this.editableNotePath = this.toEditableNotePath(_noteId);
-
-                    this.$.document.transactionsComplete.then(function() {
-                        this.$.editor.open(noteElement);
-                    }.bind(this));
-
-                    if (this.$.query && this.$.query.refresh) {
-                        this.$.query.refresh().then(function() {
-                            this.setPropertiesFromEntity("note", ["$key", "title", "body"]);
-                            this.cleanFields(["titleField", "bodyField"]);
-                        }.bind(this));
-                    }
-                } else {
-                    this.editableNotePath = "";
-                    this.$.document.reset().then(function() {
-                        this.setPropertiesFromEntity("note", ["title", "body"]);
-                        this.cleanFields(["titleField", "bodyField"]);
-                    }.bind(this));
+                console.log("note", this.note);
+                this.noteId = null;
+                if (this.isNoneMode(this.mode)) {
+                    this.note = null;
+                } else if (this.isEditMode(this.mode)) {
+                    this.noteId = _note.$id;
+                    this.note = this.toEditableObject(_note);
+                    this.setPropertiesFromEntity("note", ["title", "body"]);
+                    this.clearFieldsValidation(["titleField", "bodyField"], false);
+                } else if (this.isAddMode(this.mode)) {
+                    this.noteId = null;
+                    this.note = {title: "", body: ""};
+                    this.setPropertiesFromEntity("note", ["title", "body"]);
+                    this.clearFieldsValidation(["titleField", "bodyField"], true);
                 }
                 return Promise.resolve();
             },
 
             delete: function (_event) {
-                if (!this.$.document.isNew) {
-                    this.$.document.destroy().then(function () {
-                        this.$.document.reset();
-                        this.fire('change-view', {mode: "NONE", noteId: null, view:"list"});
-                    }.bind(this));
-
-                }
+                var recordRef = firebaseApp.database().ref(this.recordPath);
+                recordRef.remove(null);
+                this.fire('change-view', {mode: "NONE", note: null, view: "list"});
                 return Promise.resolve();
             },
 
             save: function (_event) {
                 console.log("save", _event);
-                if (this.validateFields(["titleField", "bodyField"])) {
-                    this.pushPropertiesToEntity("note", ["$key", "title", "body"]);
-                    return this.$.document.saveValue(this.notesPath).then(function () {
-                        this.$.document.reset();
-                        this.fire('change-view', {mode: "NONE", noteId: null, view:"list"});
-                    }.bind(this));
+                if (this.performFieldsValidation(["titleField", "bodyField"])) {
+                    this.pushPropertiesToEntity("note", ["title", "body"]);
+
+                    if (this.isAddMode(this.mode)) {
+                        console.log("this.note", this.note);
+                        var recordRef = firebaseApp.database().ref(this.notesPath);
+                        var result = recordRef.push(this.note);
+                        console.log("result", result);
+                    } else if (this.isEditMode(this.mode)) {
+                        console.log("this.recordPath", this.recordPath);
+                        var recordRef = firebaseApp.database().ref(this.recordPath);
+                        var result = recordRef.update(this.note);
+                        console.log("result", result);
+                    } else {
+                        console.error("Unsupported action.")
+                    }
+                    this.fire('change-view', {mode: "NONE", note: null, view: "list"});
                 }
                 return Promise.resolve();
             },
 
             cancel: function (_event) {
-                this.fire('change-view', {mode: "NONE", noteId: null, view:"list"});
+                this.fire('change-view', {mode: "NONE", note: null, view: "list"});
             },
 
             get notesPath() {
                 return '/notes/user_' + this.user.uid;
             },
 
-            toEditableNotePath: function (_editableNoteId) {
-                return this.notesPath + '/' + _editableNoteId;
+            get recordPath() {
+                return this.notesPath + "/" + this.noteId;
             },
 
             get isEditable() {

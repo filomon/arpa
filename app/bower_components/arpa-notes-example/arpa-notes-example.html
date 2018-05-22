@@ -1,5 +1,4 @@
 <link rel="import" href="../arpa-app-elements/arpa-elements.html">
-<link rel="import" href="../polymerfire/polymerfire.html">
 <link rel="import" href="../iron-pages/iron-pages.html">
 <link rel="import" href="../app-route/app-location.html">
 <link rel="import" href="../app-route/app-route.html">
@@ -26,8 +25,6 @@
             </arpa-note-list>
             <arpa-note-form id="form"
                             name="form"
-                            mode="{{mode}}"
-                            noteId="{{noteId}}"
                             route="{{route}}"
                             user="{{user}}"
                             signed-in="{{signedIn}}"
@@ -42,42 +39,26 @@
             is: 'arpa-notes-example',
 
             properties: {
-                mode: {
-                    type: String,
-                    value: "NONE",
-                    notify: true
-                },
-                noteId: {
-                    type: String,
-                    value: null,
-                    notify: true
-                }
             },
 
             observers: [
                 '_setupDefaultRoute(route)'
             ],
 
-            behaviors: [Polymer.ArpaMessages, Polymer.ArpaCore],
+            behaviors: [Polymer.ArpaMessages, Polymer.ArpaCoreModel],
 
             _setupDefaultRoute: function(_route){
               if (!this.get("routeData.view")) {
                   this.set("routeData.view", "list");
               }
+              this.$.list.refresh();
             },
 
             changeView: function(_event, _params) {
-                console.log("_params", _params);
-//                this.noteId = _params.noteId;
-//                this.mode = _params.mode;
                 if (_params.view === "list") {
-                    if (this.$.list.$.query && this.$.list.$.query.refresh) {
-                        this.$.list.$.query.refresh().then(function() {
-                        }.bind(this));
-                    }
-                }
-                if (_params.view === "form") {
-                    this.$.form.setupData(_params.mode, _params.noteId);
+                    this.$.list.refresh();
+                } else if (_params.view === "form") {
+                    this.$.form.setup(_params.mode, _params.note);
                 }
                 this.set("routeData.view", _params.view);
             }

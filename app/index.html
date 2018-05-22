@@ -17,9 +17,45 @@
   </style>
   <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
   <script src="bower_components/web-animations-js/web-animations.min.js"></script>
+  <script src="bower_components/firebase/firebase.js"></script>
+  <script src="bower_components/firebase/firebase-app.js"></script>
+  <script src="bower_components/firebase/firebase-auth.js"></script>
+  <script src="bower_components/firebase/firebase-database.js"></script>
+  <script src="bower_components/firebase/firebase-firestore.js"></script>
+  <script src="bower_components/firebase/firebase-functions.js"></script>
+  <script src="bower_components/firebase/firebase-messaging.js"></script>
+  <script src="bower_components/firebase/firebase-storage.js"></script>
   <link rel="import" href="bower_components/platinum-sw/platinum-sw-elements.html">
-  <link rel="import" href="bower_components/polymerfire/firebase-app.html">
   <link rel="import" href="arpa-app.html">
+  <script type="application/javascript">
+      window.firebaseAppInitialized = function(name, apiKey, authDomain, databaseUrl, storageBucket, messagingSenderId) {
+          if (apiKey && authDomain && databaseUrl) {
+              var init = [{
+                  apiKey: apiKey,
+                  authDomain: authDomain,
+                  databaseURL: databaseUrl,
+                  storageBucket: storageBucket,
+                  messagingSenderId: messagingSenderId
+              }];
+
+              if (name) {
+                  init.push(name);
+              }
+
+              firebase.initializeApp.apply(firebase, init);
+          } else {
+              return null;
+          }
+
+          return firebase.app(name);
+      };
+      var appName = "arpa-app";
+      var apiKey = "AIzaSyCHzaNEYZh_W-w3ykhPDmMfHGUgjJR-z3I";
+      var authDomain = "test-project-1-c97c1.firebaseapp.com";
+      var databaseUrl = "https://test-project-1-c97c1.firebaseio.com/";
+      window.firebaseApp = firebaseAppInitialized(appName, apiKey, authDomain, databaseUrl);
+      window.authProvider = new firebase.auth.GoogleAuthProvider();
+  </script>
 </head>
 
 <body>
@@ -27,10 +63,6 @@
     <platinum-sw-cache default-cache-strategy="networkFirst">
     </platinum-sw-cache>
   </platinum-sw-register>
-  <firebase-app name="arpa-app"
-                api-key="AIzaSyCHzaNEYZh_W-w3ykhPDmMfHGUgjJR-z3I"
-                auth-domain="test-project-1-c97c1.firebaseapp.com"
-                database-url="https://test-project-1-c97c1.firebaseio.com/"></firebase-app>
   <arpa-app></arpa-app>
 </body>
 

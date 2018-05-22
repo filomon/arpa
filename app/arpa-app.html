@@ -1,5 +1,4 @@
 <link rel="import" href="bower_components/polymer/polymer.html">
-<link rel="import" href="bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="bower_components/app-route/app-location.html">
 <link rel="import" href="bower_components/app-route/app-route.html">
 <link rel="import" href="bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
@@ -59,7 +58,6 @@
                 vertical-align: middle;
             }
         </style>
-        <firebase-auth id="auth" app-name="arpa-app" provider="google" signed-in="{{signedIn}}" user="{{user}}"></firebase-auth>
         <app-header reveals>
             <app-toolbar>
                 <paper-icon-button icon="menu" on-tap="_drawerToggle"></paper-icon-button>
@@ -123,12 +121,12 @@
                                  route="{{subroute}}">
             </arpa-search-element>
             <arpa-notes-example id="notes-example"
-                              name="notes-example"
-                              route="{{subroute}}"
-                              user="{{user}}"
-                              signed-in="{{signedIn}}"
-                              online="{{online}}"
-                              hidden$="[[!signedIn]]">
+                                name="notes-example"
+                                route="{{subroute}}"
+                                user="{{user}}"
+                                signed-in="{{signedIn}}"
+                                online="{{online}}"
+                                hidden$="[[!signedIn]]">
             </arpa-notes-example>
         </iron-pages>
 
@@ -145,7 +143,24 @@
                 }
             },
 
-            behaviors: [Polymer.ArpaAppBehavior],
+            behaviors: [Polymer.ArpaAppBehavior, Polymer.ArpaCoreModel],
+
+            ready: function () {
+                this._setupUserSettings(firebaseApp.auth().currentUser);
+                firebaseApp.auth().onAuthStateChanged(function (_user) {
+                    this._setupUserSettings(_user);
+                }.bind(this));
+            },
+
+            _setupUserSettings: function (_user) {
+                this.set("user", _user);
+                if (_user) {
+                    this.set("signedIn", true);
+                } else {
+                    this.set("signedIn", false);
+                }
+                console.log("_setupUserSettings(user)", _user);
+            },
 
             _computeLockIcon: function (_signedIn) {
                 return _signedIn ? 'lock-open' : 'lock';
@@ -170,10 +185,36 @@
             _switchLoginStatus: function () {
                 console.log("this.signedIn", this.signedIn);
                 if (this.signedIn) {
-                    this.$.auth.signOut();
+                    this.authSignOut();
                 } else {
-                    this.$.auth.signInWithPopup();
+                    this.authSignInWithPopup();
                 }
+            },
+            authSignInWithPopup: function () {
+                firebaseApp.auth().signInWithPopup(authProvider)
+                    .then(function (result) {
+                        var token = result.credential.accessToken;
+                        var user = result.user;
+                        this._setupUserSettings(user);
+                    }.bind(this))
+                    .catch(function (error) {
+                        var errorCode = error.code;
+                        var errorMessage = error.message;
+
+                        console.log(error.code);
+                        console.log(error.message);
+                        this._setupUserSettings(null);
+                    }.bind(this));
+            },
+            authSignOut: function () {
+                firebaseApp.auth().signOut()
+                    .then(function () {
+                        console.log('Signout Succesfull');
+                        this._setupUserSettings(null);
+                    }.bind(this), function (error) {
+                        console.log('Signout Failed');
+                        this._setupUserSettings(null);
+                    }.bind(this));
             },
 
             _getUserIcon: function (_user) {

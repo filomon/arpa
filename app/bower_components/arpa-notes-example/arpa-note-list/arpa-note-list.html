@@ -8,7 +8,6 @@
         <style include="arpa-app-shared-styles"></style>
 
         <paper-fab icon="add" on-tap="create" disabled="[[!online]]" aria-label="Add note"></paper-fab>
-        <firebase-query id="query" app-name="arpa-app" path="/notes/user_[[user.uid]]" data="{{notes}}"></firebase-query>
         <div class="page-content">
             <h3>[[es.message.note_list_title]]</h3>
             <iron-list id="main_list" class="data-list" items="[[notes]]" as="note" scroll-target="document">
@@ -33,18 +32,30 @@
             is: 'arpa-note-list',
 
             properties: {
+                notes: {
+                    type: Array,
+                    value: []
+                }
             },
 
-            behaviors: [Polymer.ArpaMessages, Polymer.ArpaCore],
+            behaviors: [Polymer.ArpaMessages, Polymer.ArpaCoreModel, Polymer.ArpaCollections],
 
+            refresh: function () {
+                if (this.user) {
+                    var notesRef = firebaseApp.database().ref("/notes/user_" + this.user.uid);
+                    notesRef.orderByKey().on("value", function (data) {
+                        this.set("notes", this.queryResultsToArrayObject(data.val()));
+                    }.bind(this));
+                }
+            },
 
-            edit: function(_event) {
+            edit: function (_event) {
                 console.log("_event", _event);
-                this.fire('change-view', {mode: "EDIT", noteId: _event.model.note.$key, view:"form"});
+                this.fire('change-view', {mode: "EDIT", note: _event.model.note, view: "form"});
             },
 
-            create: function(_event) {
-                this.fire('change-view', {mode: "ADD", noteId: null, view:"form"});
+            create: function (_event) {
+                this.fire('change-view', {mode: "ADD", note: null, view: "form"});
             },
 
             get notesPath() {
