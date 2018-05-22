@@ -1,6 +1,6 @@
-<link rel="import" href="../../arpa-app-elements/arpa-elements.html">
-<link rel="import" href="../../polymerfire/polymerfire.html">
-<link rel="import" href="../../paper-input/all-imports.html">
+<link rel="import" href="../../arpa-app-elements/arpa-common-elements.html">
+<link rel="import" href="../../paper-input/paper-input.html">
+<link rel="import" href="../../paper-input/paper-textarea.html">
 <link rel="import" href="../../paper-button/paper-button.html">
 <link rel="import" href="../../arpa-app-elements/arpa-common-behaviors.html">
 
@@ -46,11 +46,6 @@
                     value: "NONE",
                     notify: true
                 },
-                user: {
-                    type: Object,
-                    value: {},
-                    notify: true
-                },
                 noteId: {
                     type: String,
                     value: null,
@@ -62,12 +57,6 @@
                         title: "",
                         body: ""
                     },
-                    reflectToAttribute: true,
-                    notify: true
-                },
-                editableNotePath: {
-                    type: String,
-                    value: null,
                     notify: true
                 }
             },

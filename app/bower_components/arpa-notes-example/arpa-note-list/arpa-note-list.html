@@ -1,13 +1,12 @@
-<link rel="import" href="../../arpa-app-elements/arpa-elements.html">
-<link rel="import" href="../../polymerfire/polymerfire.html">
+<link rel="import" href="../../arpa-app-elements/arpa-common-elements.html">
+<link rel="import" href="../../paper-fab/paper-fab.html">
 <link rel="import" href="../../iron-list/iron-list.html">
 <link rel="import" href="../../arpa-app-elements/arpa-common-behaviors.html">
 
 <dom-module id="arpa-note-list">
     <template>
         <style include="arpa-app-shared-styles"></style>
-
-        <paper-fab icon="add" on-tap="create" disabled="[[!online]]" aria-label="Add note"></paper-fab>
+        <paper-fab icon="add" on-tap="_add" disabled="[[!online]]" aria-label="Add note"></paper-fab>
         <div class="page-content">
             <h3>[[es.message.note_list_title]]</h3>
             <iron-list id="main_list" class="data-list" items="[[notes]]" as="note" scroll-target="document">
@@ -20,7 +19,7 @@
                                 <div class="primary">[[note.title]]</div>
                                 <div class="secondary dim">[[note.body]]</div>
                             </div>
-                            <paper-button on-tap="edit">edit</paper-button>
+                            <paper-button on-tap="_edit">[[es.label.edit]]</paper-button>
                         </div>
                     </div>
                 </template>
@@ -49,26 +48,15 @@
                 }
             },
 
-            edit: function (_event) {
+            _edit: function (_event) {
                 console.log("_event", _event);
                 this.fire('change-view', {mode: "EDIT", note: _event.model.note, view: "form"});
             },
 
-            create: function (_event) {
+            _add: function (_event) {
                 this.fire('change-view', {mode: "ADD", note: null, view: "form"});
             },
 
-            get notesPath() {
-                return '/notes/user_' + this.user.uid;
-            },
-
-            toEditableId: function (_noteId) {
-                return this.notesPath + '/' + _noteId;
-            },
-
-            get isEditable() {
-                return this.online;
-            }
         });
     </script>
 </dom-module>
