@@ -5,6 +5,7 @@
     "delete" : "Eliminar",
     "save" : "Guardar",
     "cancel" : "Cancelar",
+    "title" : "Titulo",
     "body" : "Contenido",
     "error_invalid" : "Valor invalido.",
     "unsupported_action" : "Acción invalida.",
