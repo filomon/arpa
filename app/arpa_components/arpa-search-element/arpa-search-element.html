@@ -4,14 +4,20 @@
 <dom-module id="arpa-search-element">
     <template>
         <div>
-            <paper-input always-float-label label="Floating label"></paper-input>
+            <paper-input always-float-label label="{{localize('search_text')}}"></paper-input>
         </div>
     </template>
     <script>
         Polymer({
             is: 'arpa-search-element',
 
-            behaviors: [Polymer.ArpaAppBehavior]
+            behaviors: [Polymer.ArpaCore, Polymer.ArpaAppBehavior],
+
+            attached: function () {
+                if (this.loadResources) {
+                    this.loadResources(this.resolveUrl('locales.json'));
+                }
+            }
         });
     </script>
 </dom-module>

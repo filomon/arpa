@@ -1,0 +1,14 @@
+{
+  "es": {
+    "edit_header" : "Editar Nota",
+    "add_header" : "Agregar Nota",
+    "delete" : "Eliminar",
+    "save" : "Guardar",
+    "cancel" : "Cancelar",
+    "body" : "Contenido",
+    "error_invalid" : "Valor invalido.",
+    "unsupported_action" : "Acción invalida.",
+    "success_add" : "Nota '{title}' fue agregada correctamente.",
+    "success_edit" : "Nota '{title}' fue modificada correctamente."
+  }
+}

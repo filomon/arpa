@@ -7,34 +7,43 @@
          * @polymerBehavior Polymer.ArpaMessages
          */
         Polymer.ArpaMessages = {
-            properties: {
-                es: {
-                    type: Object,
-                    value: {
-                        label: {
-                            edit: "Editar",
-                            save: "Guardar",
-                            delete: "Eliminar",
-                            cancel: "Cancel",
-                            note_title: "Titulo",
-                            note_body: "Contenido"
-                        },
-                        message: {
-                            note_list_title: "Notes",
-                            note_add_title: "Add New Note",
-                            note_edit_title: "Edit Note",
-                            note_title_error: "Titulo es invalido.",
-                            note_body_error: "Contenido es invalido."
-                        }
-                    }
+            _setMessage: function (_elment, _msg) {
+                if (typeof _msg === "object" && (_msg.code || _msg.message)) {
+                    _elment.text = (_msg.code && _msg.message) ? _msg.code + ": " + _msg.message : _msg.code ? _msg.code : _msg.message;
+                } else {
+                    _elment.text = _msg;
+                }
+            },
+            showInfoMessage: function (_msg) {
+                if (Arpa.defaultToast) {
+                    this._setMessage(Arpa.defaultToast, _msg);
+                    Arpa.defaultToast.classList.remove("success-message", "info-message");
+                    Arpa.defaultToast.classList.add("info-message");
+                    Arpa.defaultToast.open();
+                }
+            },
+            showSuccessMessage: function (_msg) {
+                if (Arpa.defaultToast) {
+                    this._setMessage(Arpa.defaultToast, _msg);
+                    Arpa.defaultToast.classList.remove("success-message", "info-message");
+                    Arpa.defaultToast.classList.add("success-message");
+                    Arpa.defaultToast.open();
+                }
+            },
+            showErrorMessage: function (_msg) {
+                if (Arpa.persistentToast) {
+                    this._setMessage(Arpa.persistentToast, _msg);
+                    Arpa.persistentToast.classList.remove("error-message", "info-message");
+                    Arpa.persistentToast.classList.add("error-message");
+                    Arpa.persistentToast.open();
                 }
             }
         };
 
         /**
-         * @polymerBehavior Polymer.ArpaCoreModel
+         * @polymerBehavior Polymer.ArpaCore
          */
-        Polymer.ArpaCoreModel = {
+        Polymer.ArpaCoreImpl = {
             properties: {
                 user: {
                     type: Object,
@@ -55,9 +64,24 @@
                     type: Boolean,
                     value: false,
                     notify: true
+                },
+                language: {
+                    type: String,
+                    value: "es",
+                    notify: true
+                }
+            },
+
+            attached: function () {
+                console.log(this.localName + '#' + this.id + ' was attached');
+                console.log('this.loadResources', this.loadResources);
+                if (this.loadResources) {
+                    this.loadResources(this.resolveUrl('locales.json'));
                 }
             }
         };
+
+        Polymer.ArpaCore = [Polymer.AppLocalizeBehavior, Polymer.ArpaCoreImpl];
 
         /**
          * @polymerBehavior Polymer.ArpaForms

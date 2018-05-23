@@ -8,12 +8,12 @@
     <template>
         <style include="arpa-app-shared-styles"></style>
         <div class="page-content">
-            <h3>[[getPageTitle(mode)]]</h3>
+            <h3>[[_getPageHeader(mode)]]</h3>
             <div class="form-content">
                 <paper-input id="titleField"
                              value="{{note.title}}"
-                             error-message="{{es.message.note_title_error}}"
-                             label="[[es.label.note_title]]"
+                             error-message="{{localize('error_invalid')}}"
+                             label="{{localize('title')}}"
                              char-counter="true"
                              maxlength="50"
                              required="true"
@@ -21,17 +21,17 @@
                 <br>
                 <paper-textarea id="bodyField"
                                 value="{{note.body}}"
-                                error-message="{{es.message.note_body_error}}"
-                                label="[[es.label.note_body]]"
+                                error-message="{{localize('error_invalid')}}"
+                                label="{{localize('body')}}"
                                 char-counter="true"
                                 maxlength="500"
                                 auto-validate="true">
                 </paper-textarea>
             </div>
             <div class="page-buttons">
-                <paper-button on-tap="delete" hidden$="[[!isEditMode(mode)]]">{{es.label.delete}}</paper-button>
-                <paper-button on-tap="save" hidden$="[[isNoneMode(mode)]]">{{es.label.save}}</paper-button>
-                <paper-button on-tap="cancel" hidden$="[[isNoneMode(mode)]]">{{es.label.cancel}}</paper-button>
+                <paper-button on-tap="delete" hidden$="[[!isEditMode(mode)]]">{{localize('delete')}}</paper-button>
+                <paper-button on-tap="save" hidden$="[[isNoneMode(mode)]]">{{localize('save')}}</paper-button>
+                <paper-button on-tap="cancel" hidden$="[[isNoneMode(mode)]]">{{localize('cancel')}}</paper-button>
             </div>
         </div>
     </template>
@@ -61,11 +61,17 @@
                 }
             },
 
-            behaviors: [Polymer.ArpaMessages, Polymer.ArpaCoreModel, Polymer.ArpaForms],
+            behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages, Polymer.ArpaForms],
 
             observers: [
 //                'setup(mode, noteId)'
             ],
+
+            attached: function () {
+                if (this.loadResources) {
+                    this.loadResources(this.resolveUrl('locales.json'));
+                }
+            },
 
             isNoneMode: function (_mode) {
                 return !_mode || _mode === "NONE";
@@ -79,8 +85,8 @@
                 return _mode === "ADD";
             },
 
-            getPageTitle: function (_mode) {
-                return this.isEditMode(_mode) ? this.es.message.note_edit_title : this.isAddMode(_mode) ? this.es.message.note_add_title : "";
+            _getPageHeader: function (_mode) {
+                return this.isEditMode(_mode) ? this.localize('edit_header') : this.isAddMode(_mode) ? this.localize('add_header') : "";
             },
 
             setup: function (_mode, _note) {
@@ -112,22 +118,19 @@
             },
 
             save: function (_event) {
-                console.log("save", _event);
                 if (this.performFieldsValidation(["titleField", "bodyField"])) {
                     this.pushPropertiesToEntity("note", ["title", "body"]);
 
                     if (this.isAddMode(this.mode)) {
-                        console.log("this.note", this.note);
                         var recordRef = firebaseApp.database().ref(this.notesPath);
                         var result = recordRef.push(this.note);
-                        console.log("result", result);
+                        this.showSuccessMessage(this.localize("success_add", "title", this.note.title));
                     } else if (this.isEditMode(this.mode)) {
-                        console.log("this.recordPath", this.recordPath);
                         var recordRef = firebaseApp.database().ref(this.recordPath);
                         var result = recordRef.update(this.note);
-                        console.log("result", result);
+                        this.showSuccessMessage(this.localize("success_edit", "title", this.note.title));
                     } else {
-                        console.error("Unsupported action.")
+                        this.showErrorMessage(this.localize("unsupported_action"));
                     }
                     this.fire('change-view', {mode: "NONE", note: null, view: "list"});
                 }

@@ -16,16 +16,42 @@
                 --paper-fab-background: var(--paper-teal-500);
             }
 
-            .notes {
-                position: relative;
-                box-sizing: border-box;
-                padding: 1em;
-                max-height: calc(100vh - 46px);
-                overflow: auto;
+            /*App Styles*/
+
+            app-drawer {
+                z-index: 2;
             }
 
-            arpa-note {
-                margin-bottom: 1em;
+            app-toolbar {
+                background-color: var(--paper-green-500);
+            }
+
+            app-drawer paper-item, app-drawer paper-item iron-icon, app-drawer paper-item label {
+                cursor: pointer;
+            }
+
+            app-drawer paper-item label {
+                margin: 0 10px 0 10px;
+            }
+
+            /*Common Styles*/
+            .login-status {
+                color: black;
+                cursor: pointer;
+            }
+
+            .user-icon-container {
+                float: right;
+                margin-right: 10px;
+                font-size: 14px;
+                vertical-align: middle;
+                font-family: sans-serif;
+            }
+
+            .user-icon {
+                max-height: 25px;
+                margin: 0 5px 0 5px;
+                vertical-align: middle;
             }
 
             paper-fab {
@@ -33,20 +59,6 @@
                 bottom: 1em;
                 right: 1em;
                 z-index: 1;
-            }
-
-            @media (min-width: 640px) {
-                arpa-note {
-                    max-width: 320px;
-                    margin: 0 0.5em 1em;
-                }
-
-                .notes {
-                    @apply --layout-horizontal;
-                    @apply --layout-wrap;
-                    justify-content: center;
-                    align-content: space-around;
-                }
             }
 
             .page-content {
@@ -107,6 +119,49 @@
 
             .data-list .spacer {
                 @apply --layout-flex;
+            }
+
+            .yellow-button {
+                text-transform: none;
+                color: #eeff41;
+            }
+
+            .info-message {
+            }
+
+            .success-message {
+                background-color: var(--paper-green-500);
+            }
+
+            .error-message {
+                background-color: var(--paper-red-500);
+            }
+
+            /*Notes Styles*/
+            .notes {
+                position: relative;
+                box-sizing: border-box;
+                padding: 1em;
+                max-height: calc(100vh - 46px);
+                overflow: auto;
+            }
+
+            arpa-note {
+                margin-bottom: 1em;
+            }
+
+            @media (min-width: 640px) {
+                arpa-note {
+                    max-width: 320px;
+                    margin: 0 0.5em 1em;
+                }
+
+                .notes {
+                    @apply --layout-horizontal;
+                    @apply --layout-wrap;
+                    justify-content: center;
+                    align-content: space-around;
+                }
             }
         </style>
     </template>
