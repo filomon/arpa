@@ -29,9 +29,9 @@
                 </paper-textarea>
             </div>
             <div class="page-buttons">
-                <paper-button on-tap="delete" hidden$="[[!isEditMode(mode)]]">{{localize('delete')}}</paper-button>
-                <paper-button on-tap="save" hidden$="[[isNoneMode(mode)]]">{{localize('save')}}</paper-button>
-                <paper-button on-tap="cancel" hidden$="[[isNoneMode(mode)]]">{{localize('cancel')}}</paper-button>
+                <paper-button raised on-tap="delete" hidden$="[[!isEditMode(mode)]]">{{localize('delete')}}</paper-button>
+                <paper-button raised on-tap="save" hidden$="[[isNoneMode(mode)]]">{{localize('save')}}</paper-button>
+                <paper-button raised on-tap="cancel" hidden$="[[isNoneMode(mode)]]">{{localize('cancel')}}</paper-button>
             </div>
         </div>
     </template>

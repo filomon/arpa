@@ -73,8 +73,6 @@
             },
 
             attached: function () {
-                console.log(this.localName + '#' + this.id + ' was attached');
-                console.log('this.loadResources', this.loadResources);
                 if (this.loadResources) {
                     this.loadResources(this.resolveUrl('locales.json'));
                 }

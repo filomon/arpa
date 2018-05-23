@@ -13,11 +13,6 @@
 
             behaviors: [Polymer.ArpaCore, Polymer.ArpaAppBehavior],
 
-            attached: function () {
-                if (this.loadResources) {
-                    this.loadResources(this.resolveUrl('locales.json'));
-                }
-            }
         });
     </script>
 </dom-module>
