@@ -11,6 +11,7 @@ Start application server to get it working.
 
 ```
 cd app
+bower install
 polymer serve --port 3000
 ```
 
