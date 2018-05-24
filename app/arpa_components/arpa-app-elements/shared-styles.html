@@ -12,7 +12,6 @@
                 background-color: #e8e8e8;
                 height: 100vh;
                 @apply --paper-font-common-base;
-
                 --paper-fab-background: var(--paper-teal-500);
             }
 
@@ -37,6 +36,27 @@
 
             .pages-container {
                 padding: 10px;
+            }
+
+            .page-header {
+                width: 100%;
+                content: "";
+                display: table;
+                clear: both;
+            }
+
+            .page-header .page-header-left {
+                padding: 5px 5px 5px 0;
+                width: calc(50% - 5px);
+                float: left;
+
+            }
+
+            .page-header .page-header-right {
+                padding: 5px 0 5px 0;
+                width: calc(50% - 5px);
+                float: left;
+
             }
 
             /*Common Styles*/

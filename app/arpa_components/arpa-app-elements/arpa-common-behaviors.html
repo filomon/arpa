@@ -145,6 +145,27 @@
          * @polymerBehavior Polymer.ArpaCollections
          */
         Polymer.ArpaCollections = {
+            properties: {
+                searchText: {
+                    type: String,
+                    value: "",
+                    notify: true
+                }
+            },
+            filterArray: function (_array, _searchText) {
+                var _arguments = arguments;
+                if (!_searchText) {
+                    return _array;
+                }
+                return _array.filter(function (item, index) {
+                    var found = false;
+                    for (var i = 2; i < _arguments.length && !found; i++) {
+                        var propertyValue = item[_arguments[i]];
+                        found = propertyValue && (("" + propertyValue).match(_searchText));
+                    }
+                    return found;
+                });
+            },
             queryResultsToArrayObject: function (_queryResult) {
                 var resultArray = [];
                 if (_queryResult) {
