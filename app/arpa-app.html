@@ -27,77 +27,84 @@
         <paper-toast id="persistentToast" duration="0" text="">
             <paper-button onclick="persistentToast.toggle()" class="yellow-button">{{localize("close")}}</paper-button>
         </paper-toast>
-        <app-header reveals>
-            <app-toolbar>
-                <paper-icon-button icon="menu" on-tap="_drawerToggle"></paper-icon-button>
-                <div main-title>ARPA</div>
-                <div class="user-icon-container" hidden$="[[!signedIn]]">
-                    <label>{{_getUserName(user)}}</label>
-                    <img class="user-icon" src="[[_getUserIcon(user)]]"/>
-                </div>
-                <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
-                <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
-                <paper-icon-button class="login-status"
-                                   title="[[_computeLockTitle(signedIn)]]"
-                                   icon="[[_computeLockIcon(signedIn)]]"
-                                   on-tap="_switchLoginStatus">
-                </paper-icon-button>
-            </app-toolbar>
-        </app-header>
-        <app-drawer id="drawer" swipe-open>
-            <paper-listbox attr-for-selected="value" selected="{{routeData.page}}" fallback-selection="search-element">
-                <paper-item value="search-element" on-tap="_drawerClose">
-                    <iron-icon icon="search"></iron-icon>
-                    <label>{{localize('search_routes')}}</label>
-                </paper-item>
-                <template is="dom-if" if="{{signedIn}}">
-                    <paper-item value="notes-example" on-tap="_drawerClose">
-                        <iron-icon icon="icons:speaker-notes"></iron-icon>
-                        <label>{{localize('note_example')}}</label>
-                    </paper-item>
-                    <paper-item value="user-roles" on-tap="_drawerClose">
-                        <iron-icon icon="social:group"></iron-icon>
-                        <label>{{localize('user_roles')}}</label>
-                    </paper-item>
-                    <paper-item value="bus-models" on-tap="_drawerClose">
-                        <iron-icon icon="maps:directions-bus"></iron-icon>
-                        <label>{{localize('bus_models')}}</label>
-                    </paper-item>
-                    <paper-item value="my-routes" on-tap="_drawerClose">
-                        <iron-icon icon="maps:directions"></iron-icon>
-                        <label>{{localize('my_routes')}}</label>
-                    </paper-item>
-                    <paper-item value="my-company" on-tap="_drawerClose">
-                        <iron-icon icon="communication:contacts"></iron-icon>
-                        <label>{{localize('my_company')}}</label>
-                    </paper-item>
-                </template>
-            </paper-listbox>
-        </app-drawer>
         <app-location route="{{route}}"></app-location>
         <app-route route="{{route}}"
                    pattern="/:page"
                    data="{{routeData}}"
                    tail="{{subroute}}">
         </app-route>
-        <iron-pages role="main"
-                    selected="[[routeData.page]]"
-                    attr-for-selected="name"
-                    selected-attribute="visible"
-                    hidden$="[[!online]]">
-            <arpa-search-element id="search_element"
-                                 name="search-element"
-                                 route="{{subroute}}">
-            </arpa-search-element>
-            <arpa-notes-example id="notes-example"
-                                name="notes-example"
-                                route="{{subroute}}"
-                                user="{{user}}"
-                                signed-in="{{signedIn}}"
-                                online="{{online}}"
-                                hidden$="[[!signedIn]]">
-            </arpa-notes-example>
-        </iron-pages>
+        <app-header-layout>
+            <app-header fixed="" effects="waterfall" slot="header"
+                        style="transition-duration: 0ms; transform: translate3d(0px, 0px, 0px); left: 0px; right: 0px;">
+                <app-toolbar>
+                    <paper-icon-button icon="menu" on-tap="_drawerToggle"></paper-icon-button>
+                    <div main-title>ARPA</div>
+                    <div class="user-icon-container" hidden$="[[!signedIn]]">
+                        <label>{{_getUserName(user)}}</label>
+                        <img class="user-icon" src="[[_getUserIcon(user)]]"/>
+                    </div>
+                    <iron-icon icon="cloud" hidden$="[[!online]]"></iron-icon>
+                    <iron-icon icon="cloud-off" hidden$="[[online]]"></iron-icon>
+                    <paper-icon-button class="login-status"
+                                       title="[[_computeLockTitle(signedIn)]]"
+                                       icon="[[_computeLockIcon(signedIn)]]"
+                                       on-tap="_switchLoginStatus">
+                    </paper-icon-button>
+                </app-toolbar>
+            </app-header>
+            <app-drawer-layout id="drawerLayout">
+                <app-drawer id="drawer" slot="drawer" position="left" style="transition-duration: 200ms; touch-action: pan-y;" persistent opened>
+                    <paper-listbox attr-for-selected="value" selected="{{routeData.page}}" fallback-selection="search-element">
+                        <paper-item value="search-element">
+                            <iron-icon icon="search"></iron-icon>
+                            <label>{{localize('search_routes')}}</label>
+                        </paper-item>
+                        <template is="dom-if" if="{{signedIn}}">
+                            <paper-item value="notes-example">
+                                <iron-icon icon="icons:speaker-notes"></iron-icon>
+                                <label>{{localize('note_example')}}</label>
+                            </paper-item>
+                            <paper-item value="user-roles">
+                                <iron-icon icon="social:group"></iron-icon>
+                                <label>{{localize('user_roles')}}</label>
+                            </paper-item>
+                            <paper-item value="bus-models">
+                                <iron-icon icon="maps:directions-bus"></iron-icon>
+                                <label>{{localize('bus_models')}}</label>
+                            </paper-item>
+                            <paper-item value="my-routes">
+                                <iron-icon icon="maps:directions"></iron-icon>
+                                <label>{{localize('my_routes')}}</label>
+                            </paper-item>
+                            <paper-item value="my-company">
+                                <iron-icon icon="communication:contacts"></iron-icon>
+                                <label>{{localize('my_company')}}</label>
+                            </paper-item>
+                        </template>
+                    </paper-listbox>
+                </app-drawer>
+                <div class="pages-container">
+                    <iron-pages role="main"
+                                selected="[[routeData.page]]"
+                                attr-for-selected="name"
+                                selected-attribute="visible"
+                                hidden$="[[!online]]">
+                        <arpa-search-element id="search_element"
+                                             name="search-element"
+                                             route="{{subroute}}">
+                        </arpa-search-element>
+                        <arpa-notes-example id="notes-example"
+                                            name="notes-example"
+                                            route="{{subroute}}"
+                                            user="{{user}}"
+                                            signed-in="{{signedIn}}"
+                                            online="{{online}}"
+                                            hidden$="[[!signedIn]]">
+                        </arpa-notes-example>
+                    </iron-pages>
+                </div>
+            </app-drawer-layout>
+        </app-header-layout>
 
     </template>
     <script>
@@ -147,10 +154,11 @@
 
             _drawerToggle: function (_event) {
                 this.$.drawer.toggle();
-            },
-
-            _drawerClose: function (_event) {
-                this.$.drawer.close();
+                if (this.$.drawerLayout.forceNarrow || !this.$.drawerLayout.narrow) {
+                    this.$.drawerLayout.forceNarrow = !this.$.drawerLayout.forceNarrow;
+                } else {
+                    this.$.drawerLayout.drawer.toggle();
+                }
             },
 
             _switchLoginStatus: function () {

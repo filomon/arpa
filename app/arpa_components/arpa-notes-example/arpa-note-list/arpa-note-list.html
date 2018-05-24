@@ -6,7 +6,6 @@
 <dom-module id="arpa-note-list">
     <template>
         <style include="arpa-app-shared-styles"></style>
-        <paper-fab icon="add" on-tap="_add" disabled="[[!online]]" aria-label="{{localize('add')}}"></paper-fab>
         <div class="page-content">
             <h3>{{localize('page_header')}}</h3>
             <iron-list id="main_list" class="data-list" items="[[notes]]" as="note" scroll-target="document">
@@ -24,6 +23,7 @@
                     </div>
                 </template>
             </iron-list>
+            <paper-fab icon="add" on-tap="_add" disabled="[[!online]]" aria-label="{{localize('add')}}"></paper-fab>
         </div>
     </template>
     <script>
