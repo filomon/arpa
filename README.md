@@ -1,5 +1,5 @@
 # ARPA
-This is a web application for tickets reservation.
+This is a web application for tickets reservation by using Polymer 2.6.0 and Firebase 4.1.1.
 
 Install bower and polymer-cli to begin the development. 
 ```
