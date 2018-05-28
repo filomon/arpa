@@ -1,0 +1,228 @@
+<link rel="import" href="../../arpa-app-elements/arpa-common-elements.html">
+<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../bower_components/vaadin-text-field/vaadin-text-field.html">
+<link rel="import" href="../../../bower_components/vaadin-form-layout/vaadin-form-layout.html">
+<link rel="import" href="../../../bower_components/vaadin-date-picker/vaadin-date-picker.html">
+<link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../../bower_components/vaadin-checkbox/vaadin-checkbox.html">
+<link rel="import" href="../../arpa-app-elements/arpa-common-behaviors.html">
+
+<dom-module id="arpa-route-form">
+    <template>
+        <style include="arpa-app-shared-styles"></style>
+        <div class="page-content">
+            <h3>[[_getPageHeader(mode)]]</h3>
+            <div class="form-content">
+                <vaadin-form-layout>
+
+                    <vaadin-text-field label="{{localize('company')}}" value="{{route.company}}" readonly>
+                    </vaadin-text-field>
+
+                    <vaadin-combo-box id="modelField" label="{{localize('model')}}" value="{{route.model}}" items="[[models]]" required>
+                    </vaadin-combo-box>
+
+                    <vaadin-combo-box id="sourceField" label="{{localize('source')}}" value="{{route.source}}" items="[[cities]]" required>
+                    </vaadin-combo-box>
+
+                    <vaadin-combo-box id="targetField" label="{{localize('target')}}" value="{{route.target}}" items="[[cities]]" required>
+                    </vaadin-combo-box>
+
+                    <paper-input id="startTimeField"
+                                 type="time"
+                                 value="{{route.startTime}}"
+                                 error-message="{{localize('error_invalid')}}"
+                                 label="{{localize('start_time')}}"
+                                 required="true"
+                                 auto-validate="true">
+                    </paper-input>
+
+                    <paper-input id="endTimeField"
+                                 type="time"
+                                 value="{{route.endTime}}"
+                                 error-message="{{localize('error_invalid')}}"
+                                 label="{{localize('end_time')}}"
+                                 required="true"
+                                 auto-validate="true">
+                    </paper-input>
+
+                    <vaadin-text-field label="{{localize('duration')}}" value="{{route.duration}}" readonly>
+                    </vaadin-text-field>
+
+                    <vaadin-checkbox checked="{{hasNoValidDate}}" on-change="_handleHasNoValidDateValue">{{localize('has_no_valid_date')}}</vaadin-checkbox>
+
+                    <vaadin-date-picker id="validDateField"
+                                        value="{{route.validDate}}"
+                                        error-message="{{localize('error_invalid')}}"
+                                        label="{{localize('start_date')}}"
+                                        auto-validate="true"
+                                        hidden$="[[hasNoValidDate]]"
+                                        required="[[!hasNoValidDate]]"></vaadin-date-picker>
+
+
+                </vaadin-form-layout>
+            </div>
+            <div class="page-buttons">
+                <paper-button raised on-tap="save" hidden$="[[isNoneMode(mode)]]">{{localize('save')}}</paper-button>
+                <paper-button raised on-tap="cancel" hidden$="[[isNoneMode(mode)]]">{{localize('cancel')}}</paper-button>
+            </div>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: 'arpa-route-form',
+
+            properties: {
+                routeId: {
+                    type: String,
+                    value: null,
+                    notify: true
+                },
+                route: {
+                    type: Object,
+                    value: null,
+                    notify: true
+                },
+                cities: {
+                    type: Array,
+                    value: null
+                },
+                models: {
+                    type: Array,
+                    value: null
+                },
+                company: {
+                    type: String,
+                    value: null
+                },
+                hasNoValidDate: {
+                    type: Boolean,
+                    value: false
+                }
+            },
+
+            behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages, Polymer.ArpaForms, Polymer.ArpaQueries, Polymer.ArpaCollections],
+
+            observers: [
+                "_computeDuration(route.startTime, route.endTime)"
+            ],
+
+            _computeDuration: function (_startTime, _endTime) {
+                if (_startTime && _endTime) {
+                    var timeStart = new Date("03/25/2018 " + _startTime + ":00");
+                    var endDay = (_startTime >= _endTime ? 26 : 25);
+                    var timeEnd = new Date("03/" + endDay + "/2018 " + _endTime + ":00");
+                    const days = parseInt((timeEnd - timeStart) / (1000 * 60 * 60 * 24));
+                    const hours = parseInt(Math.abs(timeEnd - timeStart) / (1000 * 60 * 60) % 24);
+                    const minutes = parseInt(Math.abs(timeEnd.getTime() - timeStart.getTime()) / (1000 * 60) % 60);
+                    var duration = (days ? days + "d " : "") + (hours ? hours + "h " : "") + (minutes ? minutes + "m " : "");
+                    this.set("route.duration", duration);
+                } else {
+                    this.set("route.duration", 0);
+                }
+            },
+
+            _handleHasNoValidDateValue: function (_event) {
+                if (this.hasNoValidDate) {
+                    this.set("route.validDate", null);
+                }
+            },
+
+            _getPageHeader: function (_mode) {
+                return this.isEditMode(_mode) ? this.localize('edit_header') : this.isAddMode(_mode) ? this.localize('add_header') : "";
+            },
+
+            _loadAssociatedData: function () {
+                firebaseApp.database().ref("/cities").orderByKey().once("value")
+                    .then(function (data) {
+                        this.set("cities", this.getObjectKeys(data.val()))
+                    }.bind(this));
+
+                firebaseApp.database().ref("/bus_models").orderByKey().once("value")
+                    .then(function (data) {
+                        console.log("bus models");
+                        this.set("models", this.getObjectKeys(data.val(), function (_key, _value) {
+                            return _value && (_value.owner === "GLOBAL" || _value.owner === this.user.uid);
+                        }.bind(this)))
+                    }.bind(this));
+                return this.getCurrentUserCompanyName().then(function (data) {
+                    this.company = data;
+                }.bind(this));
+            },
+
+            setup: function (_mode, _route) {
+                this.mode = _mode;
+                //Setup default values
+                console.log("route", this.route);
+                this.routeId = null;
+                if (this.isNoneMode(this.mode)) {
+                    this.route = null;
+                } else if (this.isEditMode(this.mode)) {
+                    this._loadAssociatedData().then(function (data) {
+                        this.routeId = _route.$id;
+                        this.route = this.toEditableObject(_route);
+                        this.hasNoValidDate = !this.route.validDate;
+                        console.log("A: this.company: ", this.company, "this.route.company", this.route.company);
+                        if (!this.route.company) {
+                            this.route.company = this.company;
+                        }
+
+                        console.log("B: this.company: ", this.company, "this.route", this.route);
+                        this.setPropertiesFromEntity("route", ["company", "model", "source", "target", "validDate", "startTime", "endTime"]);
+                        this.clearFieldsValidation(["modelField", "sourceField", "targetField", "validDateField", "startTimeField", "endTimeField"], false);
+                    }.bind(this));
+                } else if (this.isAddMode(this.mode)) {
+                    this._loadAssociatedData().then(function (data) {
+                        this.routeId = null;
+                        this.route = {
+                            validDate: null,
+                            startTime: "",
+                            endTime: "",
+                            company: this.company
+                        };
+                        this.hasNoValidDate = true;
+                        this.setPropertiesFromEntity("route", ["company", "model", "source", "target", "validDate", "startTime", "endTime"]);
+                        this.clearFieldsValidation(["modelField", "sourceField", "targetField", "validDateField", "startTimeField", "endTimeField"], true);
+                    }.bind(this));
+                }
+                return Promise.resolve();
+            },
+
+            save: function (_event) {
+                if (this.performFieldsValidation(["modelField", "sourceField", "targetField", "validDateField", "startTimeField", "endTimeField"])) {
+                    this.pushPropertiesToEntity("route", ["company", "model", "source", "target", "validDate", "startTime", "endTime"]);
+
+                    if (this.isAddMode(this.mode)) {
+                        var recordRef = firebaseApp.database().ref(this.routesPath);
+                        var result = recordRef.push(this.route);
+                        this.showSuccessMessage(this.localize("success_add"));
+                    } else if (this.isEditMode(this.mode)) {
+                        var recordRef = firebaseApp.database().ref(this.recordPath);
+                        var result = recordRef.update(this.route);
+                        this.showSuccessMessage(this.localize("success_edit"));
+                    } else {
+                        this.showErrorMessage(this.localize("unsupported_action"));
+                    }
+                    this.fire('change-view', {mode: "NONE", route: null, view: "list"});
+                }
+                return Promise.resolve();
+            },
+
+            cancel: function (_event) {
+                this.fire('change-view', {mode: "NONE", route: null, view: "list"});
+            },
+
+            get routesPath() {
+                return '/routes';
+            },
+
+            get recordPath() {
+                return this.routesPath + "/" + this.routeId;
+            },
+
+            get isEditable() {
+                return this.online;
+            }
+        });
+    </script>
+</dom-module>
