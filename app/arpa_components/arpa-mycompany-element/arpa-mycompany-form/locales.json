@@ -1,0 +1,17 @@
+{
+  "es": {
+    "edit_header" : "Editar Empresa",
+    "add_header" : "Agregar Empresa",
+    "delete" : "Eliminar",
+    "save" : "Guardar",
+    "cancel" : "Cancelar",
+    "title" : "Titulo",
+    "body" : "Contenido",
+    "business_name":"Razon Social",
+    "description":"Descripción",
+    "error_invalid" : "Valor invalido.",
+    "unsupported_action" : "Acción invalida.",
+    "success_add" : "Nota '{title}' fue agregada correctamente.",
+    "success_edit" : "Nota '{title}' fue modificada correctamente."
+  }
+}

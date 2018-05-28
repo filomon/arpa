@@ -1,0 +1,67 @@
+<link rel="import" href="../arpa-app-elements/arpa-common-elements.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/app-route/app-location.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+<link rel="import" href="arpa-company-list/arpa-mycompany-list.html">
+<link rel="import" href="arpa-company-form/arpa-mycompan-form.html">
+
+<dom-module id="arpa-mycompany-list">
+    <template>
+        <style include="arpa-app-shared-styles"></style>
+        <app-route
+                route="{{route}}"
+                pattern="/:view"
+                data="{{routeData}}"
+                tail="{{subroute}}"></app-route>
+        <iron-pages selected="{{routeData.view}}" attr-for-selected="name">
+            <arpa-company-list id="list"
+                            name="list"
+                            route="{{route}}"
+                            user="{{user}}"
+                            signed-in="{{signedIn}}"
+                            online="{{online}}"
+                            on-change-view="changeView"
+                            hidden$="[[!signedIn]]">
+            </arpa-company-list>
+            <arpa-company-form id="form"
+                            name="form"
+                            route="{{route}}"
+                            user="{{user}}"
+                            signed-in="{{signedIn}}"
+                            online="{{online}}"
+                            on-change-view="changeView"
+                            hidden$="[[!signedIn]]">
+            </arpa-company-form>
+        </iron-pages>
+    </template>
+    <script>
+        Polymer({
+            is: 'arpa-mycompany-list',
+
+            properties: {
+            },
+
+            observers: [
+                '_setupDefaultRoute(route)'
+            ],
+
+            behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages],
+
+            _setupDefaultRoute: function(_route){
+              if (!this.get("routeData.view")) {
+                  this.set("routeData.view", "list");
+              }
+              this.$.list.refresh();
+            },
+
+            changeView: function(_event, _params) {
+                if (_params.view === "list") {
+                    this.$.list.refresh();
+                } else if (_params.view === "form") {
+                    this.$.form.setup(_params.mode, _params.note);
+                }
+                this.set("routeData.view", _params.view);
+            }
+        });
+    </script>
+</dom-module>
