@@ -1,0 +1,22 @@
+{
+  "es": {
+    "edit_header" : "Editar Itinerario",
+    "add_header" : "Agregar Itinerario",
+    "delete" : "Eliminar",
+    "save" : "Guardar",
+    "cancel" : "Cancelar",
+    "company" : "Compania",
+    "model" : "Modelo",
+    "source" : "Origen",
+    "target" : "Destino",
+    "valid_date" : "Valides",
+    "has_no_valid_date" : "Sin Fecha de Caducidad",
+    "start_time" : "Hora Salida",
+    "end_time" : "Hora Llegada",
+    "duration" : "Duración",
+    "error_invalid" : "Valor invalido.",
+    "unsupported_action" : "Acción invalida.",
+    "success_add" : "Itinerario fue agregada correctamente.",
+    "success_edit" : "Itinerario fue modificada correctamente."
+  }
+}
