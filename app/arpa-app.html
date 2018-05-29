@@ -20,6 +20,7 @@
 <link rel="import" href="arpa_components/arpa-search-element/arpa-search-element.html">
 <link rel="import" href="arpa_components/arpa-company-example/arpa-mycompany-element.html">
 <link rel="import" href="arpa_components/arpa-bus-models/arpa-bus-models.html">
+<link rel="import" href="arpa_components/arpa-routes/arpa-routes.html">
 
 <dom-module id="arpa-app">
     <template>
@@ -121,6 +122,14 @@
                                          online="{{online}}"
                                          hidden$="[[!signedIn]]">
                         </arpa-bus-models>
+                        <arpa-routes id="my-routes"
+                                            name="my-routes"
+                                            route="{{subroute}}"
+                                            user="{{user}}"
+                                            signed-in="{{signedIn}}"
+                                            online="{{online}}"
+                                            hidden$="[[!signedIn]]">
+                        </arpa-routes>
                     </iron-pages>
                 </div>
             </app-drawer-layout>
@@ -145,6 +154,10 @@
                 this._setupUserSettings(firebaseApp.auth().currentUser);
                 firebaseApp.auth().onAuthStateChanged(function (_user) {
                     this._setupUserSettings(_user);
+                }.bind(this));
+                var connectedRef = firebaseApp.database().ref(".info/connected");
+                connectedRef.on("value", function(snap) {
+                    this.online = (snap.val() === true);
                 }.bind(this));
                 window.Arpa.defaultToast = this.$.defaultToast;
                 window.Arpa.persistentToast = this.$.persistentToast;
@@ -171,6 +184,7 @@
             _isLoginRequired: function (_page) {
                 return _page === "notes-example";
             },
+
             _drawerToggle: function (_event) {
                 this.$.drawer.toggle();
                 if (this.$.drawerLayout.forceNarrow || !this.$.drawerLayout.narrow) {

@@ -1,0 +1,15 @@
+{
+  "es": {
+    "page_header" : "Itinerarios",
+    "direction" : "Ruta",
+    "valid_date" : "Valides",
+    "no_valid_date" : "No Daduca",
+    "time" : "Hora",
+    "duration" : "Duración",
+    "bus_model" : "Modelo",
+    "company" : "Compania",
+    "edit" : "Editar",
+    "add" : "Agregar Itinerario",
+    "search" : "Buscar"
+  }
+}
