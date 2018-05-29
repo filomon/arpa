@@ -10,23 +10,21 @@
         <div class="page-content">
             <h3>[[_getPageHeader(mode)]]</h3>
             <div class="form-content">
-                <template is="dom-if" if="[[isAddMode(mode)]]">
-                <paper-input id="nameField"
-                             value="{{busModelId}}"
-                             error-message="{{localize('error_invalid')}}"
-                             label="{{localize('name')}}"
-                             char-counter="true"
-                             maxlength="50"
-                             required="true"
-                             auto-validate="true"></paper-input>
-                </template>
-                <template is="dom-if" if="[[isEditMode(mode)]]">
-                    <paper-input id="nameField"
-                                 value="[[busModelId]]"
-                                 label="{{localize('name')}}"
-                                 read-only="true">
-                    </paper-input>
-                </template>
+                  <paper-input id="nameField"
+                               value="{{busModelId}}"
+                               error-message="{{localize('error_invalid')}}"
+                               label="{{localize('name')}}"
+                               char-counter="true"
+                               maxlength="50"
+                               required="true"
+                               auto-validate="true"
+                               hidden$="{{!isAddMode(mode)}}">
+                  </paper-input>
+                  <paper-input value="[[busModelId]]"
+                               label="{{localize('name')}}"
+                               readonly="true"
+                               hidden$="{{!isEditMode(mode)}}">
+                  </paper-input>
                 <br>
                 <paper-textarea id="descriptionField"
                                 value="{{busModel.description}}"

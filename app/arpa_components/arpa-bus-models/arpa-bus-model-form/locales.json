@@ -1,5 +1,8 @@
 {
   "es": {
+    "error_invalid" : "Valor invalido.",
+    "edit_header": "Editar Modelo de Bus",
+    "add_header": "Agregar Modelo de Bus",
     "save": "Guardar",
     "cancel" : "Cancelar",
     "name": "Nombre",
