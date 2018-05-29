@@ -28,7 +28,7 @@
         </style>
         <paper-toast id="defaultToast" text=""></paper-toast>
         <paper-toast id="persistentToast" duration="0" text="">
-            <paper-button onclick="persistentToast.toggle()" class="yellow-button">{{localize("close")}}</paper-button>
+            <paper-button onclick="Arpa.persistentToast.close()" class="yellow-button">{{localize("close")}}</paper-button>
         </paper-toast>
         <app-location route="{{route}}"></app-location>
         <app-route route="{{route}}"
