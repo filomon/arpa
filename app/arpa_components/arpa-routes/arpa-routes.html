@@ -41,16 +41,12 @@
             properties: {
             },
 
-            observers: [
-                '_setupDefaultRoute(route)'
-            ],
+            observers: [],
 
             behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages],
 
-            _setupDefaultRoute: function(_route){
-                if (!this.get("routeData.view")) {
-                    this.set("routeData.view", "list");
-                }
+            setup: function(){
+                this.set("routeData.view", "list");
                 this.$.list.refresh();
             },
 
