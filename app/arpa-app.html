@@ -19,6 +19,7 @@
 <link rel="import" href="arpa_components/arpa-notes-example/arpa-notes-example.html">
 <link rel="import" href="arpa_components/arpa-search-element/arpa-search-element.html">
 <link rel="import" href="arpa_components/arpa-company-example/arpa-mycompany-element.html">
+<link rel="import" href="arpa_components/arpa-bus-models/arpa-bus-models.html">
 
 <dom-module id="arpa-app">
     <template>
@@ -54,8 +55,10 @@
                 </app-toolbar>
             </app-header>
             <app-drawer-layout id="drawerLayout">
-                <app-drawer id="drawer" slot="drawer" position="left" style="transition-duration: 200ms; touch-action: pan-y;" persistent opened>
-                    <paper-listbox attr-for-selected="value" selected="{{routeData.page}}" fallback-selection="search-element">
+                <app-drawer id="drawer" slot="drawer" position="left"
+                            style="transition-duration: 200ms; touch-action: pan-y;" persistent opened>
+                    <paper-listbox attr-for-selected="value" selected="{{routeData.page}}"
+                                   fallback-selection="search-element">
                         <paper-item value="search-element">
                             <iron-icon icon="search"></iron-icon>
                             <label>{{localize('search_routes')}}</label>
@@ -103,13 +106,21 @@
                                             hidden$="[[!signedIn]]">
                         </arpa-notes-example>
                         <arpa-company-element id="mycompany-element"
-                                            name="mycompany-element"
-                                            route="{{subroute}}"
-                                            user="{{user}}"
-                                            signed-in="{{signedIn}}"
-                                            online="{{online}}"
-                                            hidden$="[[!signedIn]]">
+                                              name="mycompany-element"
+                                              route="{{subroute}}"
+                                              user="{{user}}"
+                                              signed-in="{{signedIn}}"
+                                              online="{{online}}"
+                                              hidden$="[[!signedIn]]">
                         </arpa-company-element>
+                        <arpa-bus-models id="bus-model"
+                                         name="bus-models"
+                                         route="{{subroute}}"
+                                         user="{{user}}"
+                                         signed-in="{{signedIn}}"
+                                         online="{{online}}"
+                                         hidden$="[[!signedIn]]">
+                        </arpa-bus-models>
                     </iron-pages>
                 </div>
             </app-drawer-layout>
@@ -207,5 +218,7 @@
                 return _user ? _user.displayName : "";
             }
         });
+
+
     </script>
 </dom-module>

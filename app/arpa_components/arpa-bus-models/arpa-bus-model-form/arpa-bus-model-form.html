@@ -1,0 +1,159 @@
+<link rel="import" href="../../arpa-app-elements/arpa-common-elements.html">
+<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../arpa-app-elements/arpa-common-behaviors.html">
+
+<dom-module id="arpa-bus-model-form">
+    <template>
+        <style include="arpa-app-shared-styles"></style>
+        <div class="page-content">
+            <h3>[[_getPageHeader(mode)]]</h3>
+            <div class="form-content">
+                <template is="dom-if" if="[[isAddMode(mode)]]">
+                <paper-input id="nameField"
+                             value="{{busModelId}}"
+                             error-message="{{localize('error_invalid')}}"
+                             label="{{localize('name')}}"
+                             char-counter="true"
+                             maxlength="50"
+                             required="true"
+                             auto-validate="true"></paper-input>
+                </template>
+                <template is="dom-if" if="[[isEditMode(mode)]]">
+                    <paper-input id="nameField"
+                                 value="[[busModelId]]"
+                                 label="{{localize('name')}}"
+                                 read-only="true">
+                    </paper-input>
+                </template>
+                <br>
+                <paper-textarea id="descriptionField"
+                                value="{{busModel.description}}"
+                                error-message="{{localize('error_invalid')}}"
+                                label="{{localize('description')}}"
+                                char-counter="true"
+                                maxlength="500"
+                                required="true"
+                                auto-validate="true">
+                </paper-textarea>
+            </div>
+            <div class="page-buttons">
+                <paper-button raised on-tap="save" hidden$="[[isNoneMode(mode)]]">{{localize('save')}}</paper-button>
+                <paper-button raised on-tap="cancel" hidden$="[[isNoneMode(mode)]]">{{localize('cancel')}}</paper-button>
+            </div>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: 'arpa-bus-model-form',
+
+            properties: {
+                mode: {
+                    type: String,
+//                    ["NONE", "CREATE", "EDIT"]
+                    value: "NONE",
+                    notify: true
+                },
+                busModelId: {
+                    type: String,
+                    value: null,
+                    notify: true
+                },
+                busModel: {
+                    type: Object,
+                    value: {
+                        title: "",
+                        body: ""
+                    },
+                    notify: true
+                }
+            },
+
+            behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages, Polymer.ArpaForms],
+
+            observers: [
+//                'setup(mode, busModelId)'
+            ],
+
+            attached: function () {
+                if (this.loadResources) {
+                    this.loadResources(this.resolveUrl('locales.json'));
+                }
+            },
+
+            isNoneMode: function (_mode) {
+                return !_mode || _mode === "NONE";
+            },
+
+            isEditMode: function (_mode) {
+                return _mode === "EDIT";
+            },
+
+            isAddMode: function (_mode) {
+                return _mode === "ADD";
+            },
+
+            _getPageHeader: function (_mode) {
+                return this.isEditMode(_mode) ? this.localize('edit_header') : this.isAddMode(_mode) ? this.localize('add_header') : "";
+            },
+
+            setup: function (_mode, _busModel) {
+                this.mode = _mode;
+                //Setup default values
+                console.log("busModel", this.busModel);
+                this.busModelId = null;
+                if (this.isNoneMode(this.mode)) {
+                    this.busModel = null;
+                } else if (this.isEditMode(this.mode)) {
+                    this.busModelId = _busModel.$id;
+                    this.busModel = this.toEditableObject(_busModel);
+                    this.setPropertiesFromEntity("busModel", ["description"]);
+                    this.clearFieldsValidation(["nameField", "descriptionField"], false);
+                } else if (this.isAddMode(this.mode)) {
+                    this.busModelId = null;
+                    this.busModel = {description: ""};
+                    this.setPropertiesFromEntity("busModel", ["description"]);
+                    this.clearFieldsValidation(["nameField", "descriptionField"], true);
+                }
+                return Promise.resolve();
+            },
+
+            save: function (_event) {
+                if (this.performFieldsValidation(["descriptionField"])) {
+                    this.pushPropertiesToEntity("busModel", ["description"]);
+
+                    if (this.isAddMode(this.mode)) {
+                        var recordRef = firebaseApp.database().ref(this.recordPath);
+                        var result = recordRef.set(this.busModel);
+                        this.showSuccessMessage(this.localize("success_add", "title", this.busModelId));
+                    } else if (this.isEditMode(this.mode)) {
+                        var recordRef = firebaseApp.database().ref(this.recordPath);
+                        var result = recordRef.update(this.busModel);
+                        this.showSuccessMessage(this.localize("success_edit", "title", this.busModelId));
+                    } else {
+                        this.showErrorMessage(this.localize("unsupported_action"));
+                    }
+                    this.fire('change-view', {mode: "NONE", busModel: null, view: "list"});
+                }
+                return Promise.resolve();
+            },
+
+            cancel: function (_event) {
+                this.fire('change-view', {mode: "NONE", busModel: null, view: "list"});
+            },
+
+            get busModelsPath() {
+                return '/bus_models';
+            },
+
+            get recordPath() {
+                return this.busModelsPath + "/" + this.busModelId;
+            },
+
+            get isEditable() {
+                return this.online;
+            }
+        });
+    </script>
+</dom-module>

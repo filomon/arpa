@@ -1,0 +1,14 @@
+{
+  "es": {
+    "save": "Guardar",
+    "cancel" : "Cancelar",
+    "name": "Nombre",
+    "description": "Descripcion Comercial",
+    "" : "Marca",
+    "" : "Comodidad",
+    "" : "Numero de Pisos",
+    "" : "Numero de asientos",
+    "" : "Numero de Tvs",
+    "" : "Numero de Baños"
+  }
+}
