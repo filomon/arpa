@@ -1,7 +1,9 @@
 <link rel="import" href="../../arpa-app-elements/arpa-common-elements.html">
-<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
-<link rel="import" href="../../../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../bower_components/vaadin-form-layout/vaadin-form-layout.html">
+<link rel="import" href="../../../bower_components/vaadin-text-field/vaadin-text-field.html">
+<link rel="import" href="../../../bower_components/vaadin-text-field/vaadin-text-area.html">
+<link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
 <link rel="import" href="../../arpa-app-elements/arpa-common-behaviors.html">
 
 <dom-module id="arpa-bus-model-form">
@@ -10,33 +12,65 @@
         <div class="page-content">
             <h3>[[_getPageHeader(mode)]]</h3>
             <div class="form-content">
-                <template is="dom-if" if="[[isAddMode(mode)]]">
-                <paper-input id="nameField"
-                             value="{{busModelId}}"
-                             error-message="{{localize('error_invalid')}}"
-                             label="{{localize('name')}}"
-                             char-counter="true"
-                             maxlength="50"
-                             required="true"
-                             auto-validate="true"></paper-input>
-                </template>
-                <template is="dom-if" if="[[isEditMode(mode)]]">
-                    <paper-input id="nameField"
-                                 value="[[busModelId]]"
+                <vaadin-form-layout>
+                    <vaadin-text-field id="nameField"
+                                 value="{{busModelId}}"
+                                 error-message="{{localize('error_invalid')}}"
                                  label="{{localize('name')}}"
-                                 read-only="true">
-                    </paper-input>
-                </template>
-                <br>
-                <paper-textarea id="descriptionField"
-                                value="{{busModel.description}}"
-                                error-message="{{localize('error_invalid')}}"
-                                label="{{localize('description')}}"
-                                char-counter="true"
-                                maxlength="500"
-                                required="true"
-                                auto-validate="true">
-                </paper-textarea>
+                                 char-counter="true"
+                                 maxlength="50"
+                                 required="true"
+                                 auto-validate="true"
+                                 readonly="{{isEditMode(mode)}}">
+                    </vaadin-text-field>
+                    <vaadin-text-area id="descriptionField"
+                                    value="{{busModel.description}}"
+                                    error-message="{{localize('error_invalid')}}"
+                                    label="{{localize('description')}}"
+                                    char-counter="true"
+                                    maxlength="500"
+                                    required="true"
+                                    auto-validate="true">
+                    </vaadin-text-area>
+                    <vaadin-combo-box id="trademarkField"
+                                      error-message="{{localize('error_invalid')}}"
+                                      label="{{localize('trademark')}}"
+                                      value="{{busModel.trademark}}"
+                                      items="[[trademarks]]"
+                                      required="true">
+                    </vaadin-combo-box>
+                    <vaadin-combo-box id="confortField"
+                                      error-message="{{localize('error_invalid')}}"
+                                      label="{{localize('confort')}}"
+                                      value="{{busModel.confort}}"
+                                      items="[[confortTypes]]"
+                                      required>
+                    </vaadin-combo-box>
+                    <vaadin-text-field id="floorsNumberField"
+                                 value="{{busModel.floorsNumber}}"
+                                 error-message="{{localize('error_invalid')}}"
+                                 label="{{localize('floors_number')}}"
+                                 readonly="true">
+                    </vaadin-text-field>
+                    <vaadin-text-field id="seatsNumberField"
+                                 value="{{busModel.seatsNumber}}"
+                                 error-message="{{localize('error_invalid')}}"
+                                 label="{{localize('seats_number')}}"
+                                 readonly="true">
+                    </vaadin-text-field>
+                    <vaadin-text-field id="toiletNumberField"
+                                 value="{{busModel.toiletNumber}}"
+                                 error-message="{{localize('error_invalid')}}"
+                                 label="{{localize('toilet_number')}}"
+                                 readonly="true">
+                    </vaadin-text-field>
+                    <vaadin-text-field id="tvNumberField"
+                                 value="{{busModel.tvNumber}}"
+                                 error-message="{{localize('error_invalid')}}"
+                                 label="{{localize('tv_number')}}"
+                                 readonly="true">
+                    </vaadin-text-field>
+                </vaadin-form-layout>
             </div>
             <div class="page-buttons">
                 <paper-button raised on-tap="save" hidden$="[[isNoneMode(mode)]]">{{localize('save')}}</paper-button>
@@ -57,17 +91,39 @@
                 busModel: {
                     type: Object,
                     value: {
-                        title: null,
-                        body: null
+                        title: "",
+                        body: ""
                     },
                     notify: true
+                },
+                trademarks: {
+                    type: Array,
+                    value: null
+                },
+                confortTypes: {
+                    type: Array,
+                    value: ["Normal", "Cama", "Suite Cama"]
                 }
             },
 
-            behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages, Polymer.ArpaForms],
+            behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages, Polymer.ArpaForms, Polymer.ArpaQueries, Polymer.ArpaCollections],
 
             _getPageHeader: function (_mode) {
                 return this.isEditMode(_mode) ? this.localize('edit_header') : this.isAddMode(_mode) ? this.localize('add_header') : "";
+            },
+
+            _loadFormData: function () {
+                return firebaseApp.database().ref("/bus_trademarks").orderByKey().once("value")
+                    .then(function (data) {
+                        this.set("trademarks", this.getObjectKeys(data.val()))
+                    }.bind(this));
+            },
+
+            _validateUniqueModelName: function () {
+                return firebaseApp.database().ref(this.recordPath).orderByKey().once("value")
+                    .then(function (data) {
+                        return (data === null || data.val() === null);
+                    }.bind(this));
             },
 
             setup: function (_mode, _busModel) {
@@ -78,35 +134,54 @@
                 if (this.isNoneMode(this.mode)) {
                     this.busModel = null;
                 } else if (this.isEditMode(this.mode)) {
-                    this.busModelId = _busModel.$id;
-                    this.busModel = this.toEditableObject(_busModel);
-                    this.setPropertiesFromEntity("busModel", ["description"]);
-                    this.clearFieldsValidation(["nameField", "descriptionField"], false);
+                    this._loadFormData().then(function (data) {
+                        this.busModelId = _busModel.$id;
+                        this.busModel = this.toEditableObject(_busModel);
+                        this.setPropertiesFromEntity("busModel", ["description"]);
+                        this.clearFieldsValidation(["nameField", "descriptionField"], false);
+                    }.bind(this));
                 } else if (this.isAddMode(this.mode)) {
-                    this.busModelId = null;
-                    this.busModel = {description: ""};
-                    this.setPropertiesFromEntity("busModel", ["description"]);
-                    this.clearFieldsValidation(["nameField", "descriptionField"], true);
+                    this._loadFormData().then(function (data) {
+                        this.busModelId = null;
+                        this.busModel = {description: "", trademark: "", confort: "",
+                                         floorsNumber: 0, seatsNumber: 0, toiletNumber: 0, tvNumber: 0};
+                        //Createting the accessing of every property of busModel json
+                        this.setPropertiesFromEntity("busModel", ["description", "trademark", "confort",
+                                                                  "floorsNumber", "seatsNumber", "toiletNumber",
+                                                                  "tvNumber"]);
+                        //Cleared out every field in the form listed below.
+                        this.clearFieldsValidation(["nameField", "descriptionField", "trademarkField", "confortField"], true);
+                    }.bind(this));
                 }
                 return Promise.resolve();
             },
 
             save: function (_event) {
-                if (this.performFieldsValidation(["descriptionField"])) {
-                    this.pushPropertiesToEntity("busModel", ["description"]);
-
+                //Validate input fields
+                if (this.performFieldsValidation(["nameField", "descriptionField", "trademarkField", "confortField"])) {
+                    //Set busModel properties from UI
+                    this.pushPropertiesToEntity("busModel", ["description", "trademark", "confort",
+                                                             "floorsNumber", "seatsNumber", "toiletNumber",
+                                                             "tvNumber"]);
                     if (this.isAddMode(this.mode)) {
-                        var recordRef = firebaseApp.database().ref(this.recordPath);
-                        var result = recordRef.set(this.busModel);
-                        this.showSuccessMessage(this.localize("success_add", "title", this.busModelId));
+                        this._validateUniqueModelName().then(function (data) {
+                          if (data) {
+                            var recordRef = firebaseApp.database().ref(this.recordPath);
+                            var result = recordRef.set(this.busModel);
+                            this.showSuccessMessage(this.localize("success_add", "name", this.busModelId));
+                            this.fire('change-view', {mode: "NONE", busModel: null, view: "list"});
+                          } else {
+                              this.showErrorMessage(this.localize("duplicated_model_name", "name", this.busModelId));
+                          }
+                        }.bind(this));
                     } else if (this.isEditMode(this.mode)) {
                         var recordRef = firebaseApp.database().ref(this.recordPath);
                         var result = recordRef.update(this.busModel);
-                        this.showSuccessMessage(this.localize("success_edit", "title", this.busModelId));
+                        this.showSuccessMessage(this.localize("success_edit", "name", this.busModelId));
                     } else {
                         this.showErrorMessage(this.localize("unsupported_action"));
                     }
-                    this.fire('change-view', {mode: "NONE", busModel: null, view: "list"});
+
                 }
                 return Promise.resolve();
             },

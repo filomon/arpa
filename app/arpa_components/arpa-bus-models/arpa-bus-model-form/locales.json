@@ -1,14 +1,19 @@
 {
   "es": {
+    "error_invalid" : "Valor invalido.",
+    "edit_header": "Editar Modelo de Bus",
+    "add_header": "Agregar Modelo de Bus",
     "save": "Guardar",
     "cancel" : "Cancelar",
     "name": "Nombre",
     "description": "Descripcion Comercial",
-    "" : "Marca",
-    "" : "Comodidad",
-    "" : "Numero de Pisos",
-    "" : "Numero de asientos",
-    "" : "Numero de Tvs",
-    "" : "Numero de Baños"
+    "trademark" : "Marca",
+    "confort" : "Comodidad",
+    "floors_number" : "Numero de Pisos",
+    "seats_number" : "Numero de asientos",
+    "toilet_number" : "Numero de Tvs",
+    "tv_number" : "Numero de Baños",
+    "success_add": "El modelo de bus '{name}' fue guardardo satisfactoriamente.",
+    "duplicated_model_name": "El modelo de bus '{name}' ya existe."
   }
 }
