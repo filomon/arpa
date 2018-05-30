@@ -14,6 +14,8 @@
     "toilet_number" : "Numero de Tvs",
     "tv_number" : "Numero de Baños",
     "success_add": "El modelo de bus '{name}' fue guardardo satisfactoriamente.",
-    "duplicated_model_name": "El modelo de bus '{name}' ya existe."
+    "duplicated_model_name": "El modelo de bus '{name}' ya existe.",
+    "success_edit": "El modelo de bus '{name}' fue guardardo satisfactoriamente.",
+    "unsupported_action": "Esta acción no esta permitida. Contacte al administrador para mas detalle"
   }
 }

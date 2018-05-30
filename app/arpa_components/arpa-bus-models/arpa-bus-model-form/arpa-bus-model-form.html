@@ -137,8 +137,10 @@
                     this._loadFormData().then(function (data) {
                         this.busModelId = _busModel.$id;
                         this.busModel = this.toEditableObject(_busModel);
-                        this.setPropertiesFromEntity("busModel", ["description"]);
-                        this.clearFieldsValidation(["nameField", "descriptionField"], false);
+                        this.setPropertiesFromEntity("busModel", ["description", "trademark", "confort",
+                                                                  "floorsNumber", "seatsNumber", "toiletNumber",
+                                                                  "tvNumber"]);
+                        this.clearFieldsValidation(["nameField", "descriptionField", "trademarkField", "confortField"], false);
                     }.bind(this));
                 } else if (this.isAddMode(this.mode)) {
                     this._loadFormData().then(function (data) {
@@ -178,6 +180,7 @@
                         var recordRef = firebaseApp.database().ref(this.recordPath);
                         var result = recordRef.update(this.busModel);
                         this.showSuccessMessage(this.localize("success_edit", "name", this.busModelId));
+                        this.fire('change-view', {mode: "NONE", busModel: null, view: "list"});
                     } else {
                         this.showErrorMessage(this.localize("unsupported_action"));
                     }

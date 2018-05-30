@@ -47,11 +47,9 @@
 
             behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages],
 
-            _setupDefaultRoute: function(_route){
-              if (!this.get("routeData.view")) {
-                  this.set("routeData.view", "list");
-              }
-              this.$.list.refresh();
+            setup: function(){
+                this.set("routeData.view", "list");
+                this.$.list.refresh();
             },
 
             changeView: function(_event, _params) {
