@@ -148,6 +148,9 @@
 
             behaviors: [Polymer.ArpaCore, Polymer.ArpaAppBehavior, Polymer.ArpaMessages],
 
+            /**
+             * Setups application authentication current status and default properties value.
+             */
             ready: function () {
                 this._setupUserSettings(firebaseApp.auth().currentUser);
                 firebaseApp.auth().onAuthStateChanged(function (_user) {
@@ -161,6 +164,10 @@
                 window.Arpa.persistentToast = this.$.persistentToast;
             },
 
+            /**
+             * @param _user The current user.
+             * @private
+             */
             _setupUserSettings: function (_user) {
                 this.set("user", _user);
                 if (_user) {
@@ -168,28 +175,71 @@
                 } else {
                     this.set("signedIn", false);
                 }
-                ;
             },
 
+            /**
+             * Executes "setup" function if the selected page has "setup" function defined.
+             *
+             * @param _event
+             * @private
+             */
             _setupSelectedPage: function(_event) {
                 var elementId = _event.currentTarget.getAttribute("value");
-                if (this.$[elementId] !== null && typeof this.$[elementId].setup === "function") {
+                if (this.$[elementId] && this.$[elementId].setup && typeof this.$[elementId].setup === "function") {
                     this.$[elementId].setup();
                 }
             },
 
+            /**
+             * Difines Lock icon value based on _signedIn parameter.
+             * 
+             * @param _signedIn The current signedIn value. 
+             * @return {string}
+             * @private
+             */
             _computeLockIcon: function (_signedIn) {
                 return _signedIn ? 'lock-open' : 'lock';
             },
 
+            /**
+             * Difines Lock label value based on _signedIn parameter.
+             *
+             * @param _signedIn The current signedIn value.
+             * @return {string}
+             * @private
+             */
             _computeLockTitle: function (_signedIn) {
                 return _signedIn ? 'Logout' : 'Login';
             },
 
-            _isLoginRequired: function (_page) {
-                return _page === "notes_example";
+            /**
+             * Returns user icon url.
+             *
+             * @param _user The current user.
+             * @returns {string}
+             * @private
+             */
+            _getUserIcon: function (_user) {
+                return _user && _user.photoURL ? _user.photoURL : "./arpa_components/arpa-app-elements/images/icon-1x.png";
             },
 
+            /**
+             * Returns user name.
+             *
+             * @param _user The current user.
+             * @returns {string}
+             * @private
+             */
+            _getUserName: function (_user) {
+                return _user ? _user.displayName : "";
+            },
+
+            /**
+             * Handles drawer toggle actions.
+             * 
+             * @param _event The current event.
+             * @private
+             */
             _drawerToggle: function (_event) {
                 this.$.drawer.toggle();
                 if (this.$.drawerLayout.forceNarrow || !this.$.drawerLayout.narrow) {
@@ -199,14 +249,25 @@
                 }
             },
 
-            _switchLoginStatus: function () {
+            /**
+             * Handles login status in order to SignOut or show SignIn popup.
+             *
+             * @param _event The current event.
+             * @private
+             */
+            _switchLoginStatus: function (_event) {
                 if (this.signedIn) {
-                    this.authSignOut();
+                    this._authSignOut();
                 } else {
-                    this.authSignInWithPopup();
+                    this._authSignInWithPopup();
                 }
             },
-            authSignInWithPopup: function () {
+
+            /**
+             * Opens SignIn Popup.
+             * @private
+             */
+            _authSignInWithPopup: function () {
                 firebaseApp.auth().signInWithPopup(authProvider)
                     .then(function (result) {
                         var token = result.credential.accessToken;
@@ -220,21 +281,18 @@
                         this._setupUserSettings(null);
                     }.bind(this));
             },
-            authSignOut: function () {
+
+            /**
+             * SignOuts current session.
+             * @private
+             */
+            _authSignOut: function () {
                 firebaseApp.auth().signOut()
                     .then(function () {
                         this._setupUserSettings(null);
                     }.bind(this), function (error) {
                         this._setupUserSettings(null);
                     }.bind(this));
-            },
-
-            _getUserIcon: function (_user) {
-                return _user && _user.photoURL ? _user.photoURL : "./arpa_components/arpa-app-elements/images/icon-1x.png";
-            },
-
-            _getUserName: function (_user) {
-                return _user ? _user.displayName : "";
             }
         });
 

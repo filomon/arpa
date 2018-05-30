@@ -105,13 +105,27 @@
                 color: var(--paper-green-100);
             }
 
-            .data-list .item {
+            .page-buttons paper-button.orange {
+                background-color: var(--paper-orange-800);
+                color: var(--paper-grey-100);
+            }
+
+            .page-buttons paper-button.green {
+                background-color: var(--paper-green-800);
+                color: var(--paper-grey-100);
+            }
+
+            .data-list .item, .data-list .inactive {
                 @apply --layout-horizontal;
                 padding: 20px;
                 border-radius: 8px;
                 background-color: white;
                 border: 1px solid #ddd;
                 margin: 16px auto 0 auto;
+            }
+
+            .data-list .inactive {
+                background-color: var(--paper-grey-100);
             }
 
             .data-list .item:focus {
