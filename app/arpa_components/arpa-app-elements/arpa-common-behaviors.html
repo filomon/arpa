@@ -7,6 +7,13 @@
          * @polymerBehavior Polymer.ArpaMessages
          */
         Polymer.ArpaMessages = {
+            /**
+             * Sets message text.
+             *
+             * @param _elment
+             * @param _msg
+             * @private
+             */
             _setMessage: function (_elment, _msg) {
                 if (typeof _msg === "object" && (_msg.code || _msg.message)) {
                     _elment.text = (_msg.code && _msg.message) ? _msg.code + ": " + _msg.message : _msg.code ? _msg.code : _msg.message;
@@ -14,6 +21,12 @@
                     _elment.text = _msg;
                 }
             },
+
+            /**
+             * Shows global information message.
+             *
+             * @param _msg
+             */
             showInfoMessage: function (_msg) {
                 if (Arpa.defaultToast) {
                     this._setMessage(Arpa.defaultToast, _msg);
@@ -22,6 +35,12 @@
                     Arpa.defaultToast.open();
                 }
             },
+
+            /**
+             * Shows global success message.
+             *
+             * @param _msg
+             */
             showSuccessMessage: function (_msg) {
                 if (Arpa.defaultToast) {
                     this._setMessage(Arpa.defaultToast, _msg);
@@ -30,6 +49,11 @@
                     Arpa.defaultToast.open();
                 }
             },
+
+            /**
+             * Shows global error message.
+             * @param _msg
+             */
             showErrorMessage: function (_msg) {
                 if (Arpa.persistentToast) {
                     this._setMessage(Arpa.persistentToast, _msg);
@@ -72,6 +96,9 @@
                 }
             },
 
+            /**
+             * Loads resources when "attached" Polymer event is triggered.
+             */
             attached: function () {
                 if (this.loadResources) {
                     this.loadResources(this.resolveUrl('locales.json'));
@@ -92,62 +119,124 @@
                     notify: true
                 }
             },
+
+            /**
+             * Defines if mode is NONE.
+             *
+             * @param _mode The mode current value
+             * @returns {boolean}
+             */
             isNoneMode: function (_mode) {
                 return !_mode || _mode === "NONE";
             },
+
+            /**
+             * Defines if mode is EDIT.
+             *
+             * @param _mode The mode current value
+             * @returns {boolean}
+             */
             isEditMode: function (_mode) {
                 return _mode === "EDIT";
             },
+
+            /**
+             * Defines if mode is ADD.
+             *
+             * @param _mode The mode current value
+             * @returns {boolean}
+             */
             isAddMode: function (_mode) {
                 return _mode === "ADD";
             },
+
+            /**
+             * Creates a clone of an object.
+             *
+             * @param _object
+             * @returns {*|Object}
+             */
             cloneObject: function (_object) {
                 return JSON.parse(JSON.stringify(_object));
             },
+
+            /**
+             * Creates a clone of an object and removes "$id" property.
+             *
+             * @param _object
+             * @returns {*|Object}
+             */
             toEditableObject: function (_object) {
                 var clonedObj = this.cloneObject(_object);
                 delete clonedObj["$id"];
                 return clonedObj;
             },
+
+            /**
+             * Performs a generic fields validation based on an list of fields id.
+             *
+             * @param _fieldIds The fields id to validate.
+             * @returns {boolean}
+             */
             performFieldsValidation: function (_fieldIds) {
                 var valid = true;
-                for (var i = 0; i < _fieldIds.length; i++) {
-                    if (this.$[_fieldIds[i]]) {
-                        this.$[_fieldIds[i]].validate();
-                        if (this.$[_fieldIds[i]].invalid) {
+                for (var fieldPosition = 0; fieldPosition < _fieldIds.length; fieldPosition++) {
+                    if (this.$[_fieldIds[fieldPosition]]) {
+                        this.$[_fieldIds[fieldPosition]].validate();
+                        if (this.$[_fieldIds[fieldPosition]].invalid) {
                             valid = false;
                         }
                     } else {
-                        console.log("Field not found: " + _fieldIds[i]);
+                        console.log("Field not found: " + _fieldIds[fieldPosition]);
                     }
                 }
                 return valid;
             },
+
+            /**
+             * Clears fields content and hides fields validations based on an list of fields id and _clearFields flag.
+             *
+             * @param _fieldIds The fields id to manage.
+             * @param _clearFields
+             */
             clearFieldsValidation: function (_fieldIds, _clearFields) {
-                for (var i = 0; i < _fieldIds.length; i++) {
-                    if (this.$[_fieldIds[i]]) {
-                        if (_clearFields && this.$[_fieldIds[i]].clear) {
-                            this.$[_fieldIds[i]].clear();
+                for (var fieldPosition = 0; fieldPosition < _fieldIds.length; fieldPosition++) {
+                    if (this.$[_fieldIds[fieldPosition]]) {
+                        if (_clearFields && this.$[_fieldIds[fieldPosition]].clear) {
+                            this.$[_fieldIds[fieldPosition]].clear();
                         }
-                        this.$[_fieldIds[i]].invalid = false;
+                        this.$[_fieldIds[fieldPosition]].invalid = false;
                     } else {
-                        console.log("Field not found: " + _fieldIds[i]);
+                        console.log("Field not found: " + _fieldIds[fieldPosition]);
                     }
                 }
             },
+
+            /**
+             * Sets property values(_objectName._propertyName) from source object to Polymer context.
+             *
+             * @param _objectName The object name to manage.
+             * @param _propertyNames The properties name.
+             */
             setPropertiesFromEntity: function (_objectName, _propertyNames) {
                 var jsonObject = this.get(_objectName);
-                for (var i = 0; i < _propertyNames.length; i++) {
-                    var propertyName = _propertyNames[i];
+                for (var propPosition = 0; propPosition < _propertyNames.length; propPosition++) {
+                    var propertyName = _propertyNames[propPosition];
                     var propertyValue = jsonObject[propertyName];
                     var propertyPath = _objectName + "." + propertyName;
                     this.set(propertyPath, propertyValue);
                 }
             },
+
+            /**
+             *  Sets property values(_objectName._propertyName) from Polymer context to target object.
+             * @param _objectName
+             * @param _propertyNames
+             */
             pushPropertiesToEntity: function (_objectName, _propertyNames) {
                 var jsonObject = this.get(_objectName);
-                for (var i = 0; i < _propertyNames.length; i++) {
-                    var propertyName = _propertyNames[i];
+                for (var propPosition = 0; propPosition < _propertyNames.length; propPosition++) {
+                    var propertyName = _propertyNames[propPosition];
                     var propertyPath = _objectName + "." + propertyName;
                     var propertyValue = this.get(propertyPath);
                     if (typeof propertyValue !== 'undefined') {
@@ -161,6 +250,11 @@
          * @polymerBehavior Polymer.ArpaQueries
          */
         Polymer.ArpaQueries = {
+            /**
+             * Returns company name associated to current user.
+             *
+             * @returns {promise}
+             */
             getCurrentUserCompanyName: function () {
                 return firebaseApp.database().ref("/companies").orderByChild("owner").equalTo(this.user.uid).once("value").then(function (data) {
                     if (data && data.val()) {
@@ -185,22 +279,37 @@
                     notify: true
                 }
             },
+
+            /**
+             * Generic logic to filter an array.
+             *
+             * @param _array The array.
+             * @param _searchText The search text.
+             */
             filterArray: function (_array, _searchText) {
                 var _searchTextLC = _searchText.toLowerCase();
                 var _arguments = arguments;
                 return _array.filter(function (item, index) {
                     var found = false;
-                    for (var i = 2; i < _arguments.length && !found; i++) {
-                        if (typeof _arguments[i] === "function") {
-                            found =  _arguments[i](this, item, index);
-                        } else if (_searchTextLC && typeof _arguments[i] === "string") {
-                            var propertyValue = item[_arguments[i]];
+                    for (var criteriaIndex = 2; criteriaIndex < _arguments.length && !found; criteriaIndex++) {
+                        if (typeof _arguments[criteriaIndex] === "function") {
+                            found = _arguments[criteriaIndex](this, item, index);
+                        } else if (_searchTextLC && typeof _arguments[criteriaIndex] === "string") {
+                            var propertyValue = item[_arguments[criteriaIndex]];
                             found = propertyValue && (("" + propertyValue).toLowerCase().match(_searchTextLC));
                         }
                     }
                     return found;
                 }.bind(this));
             },
+
+            /**
+             * Converts firebase query result to an simple array with json object.
+             *
+             * @param _queryResult The query result.
+             * @param filterFn Custom function to filter properties and values.
+             * @returns {Array}
+             */
             queryResultsToArrayObject: function (_queryResult, filterFn) {
                 var resultArray = [];
                 if (_queryResult) {
@@ -216,6 +325,13 @@
                 }
                 return resultArray;
             },
+            /**
+             * Returns the object properties name.
+             *
+             * @param _queryResult The query result.
+             * @param filterFn Custom function to filter properties and values.
+             * @returns {Array}
+             */
             getObjectKeys: function (_queryResult, filterFn) {
                 var resultArray = [];
                 if (_queryResult) {

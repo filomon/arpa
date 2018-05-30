@@ -45,11 +45,20 @@
 
             behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages],
 
+            /**
+             * Defines default elements that should be loaded when arpa-route is selected.
+             */
             setup: function(){
                 this.set("routeData.view", "list");
                 this.$.list.refresh();
             },
 
+            /**
+             * Setups selected "view" based on _params parameter.
+             *
+             * @param _event The current event.
+             * @param _params The current parameters.
+             */
             changeView: function(_event, _params) {
                 if (_params.view === "list") {
                     this.$.list.refresh();

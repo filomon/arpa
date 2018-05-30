@@ -26,7 +26,9 @@
 
                         <div class="item" tabindex$="[[tabIndex]]">
                             <div class="pad">
-                                <div class="primary"><b>{{localize('direction')}}:</b> [[route.source]] - [[route.target]][[_getArchivedLabel(route.archived)]]</div>
+                                <div class="primary"><b>{{localize('direction')}}:</b> [[route.source]] -
+                                    [[route.target]][[_getArchivedLabel(route.archived)]]
+                                </div>
                                 <div class="secondary dim">
                                     <b>{{localize('valid_date')}}:</b> [[_validDateLabel(route.validDate)]]&nbsp|&nbsp
                                     <b>{{localize('time')}}:</b> [[route.startTime]] - [[route.endTime]]&nbsp|&nbsp
@@ -36,7 +38,7 @@
                                     <b>{{localize('company')}}:</b> [[route.company]] | <b>{{localize('bus_model')}}:</b> [[route.model]]
                                 </div>
                             </div>
-                            <paper-button on-tap="_edit">{{_getEditLabel(route.archived)}}</paper-button>
+                            <paper-button on-tap="_edit">{{_getItemActionLabel(route.archived)}}</paper-button>
                         </div>
                     </div>
                 </template>
@@ -62,10 +64,22 @@
 
             behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages, Polymer.ArpaCollections],
 
+            /**
+             * Implements a custom filter logic to use showArchived property as base filter.
+             *
+             * @param _this The object reference to handle current Polymer instance.
+             * @param item Current item that is being iterated.
+             * @param index Item current i.dex.
+             * @returns {boolean}
+             * @private
+             */
             _filterArchivedRoutes: function (_this, item, index) {
                 return _this.showArchived ? true : !item.archived;
             },
 
+            /**
+             * Refresh Routes list that belong on current user.
+             */
             refresh: function () {
                 if (this.user) {
                     var routesRef = firebaseApp.database().ref("/routes");
@@ -78,22 +92,55 @@
                 }
             },
 
-            _getEditLabel: function (_archived) {
+            /**
+             * Returns the label "view" or "edit", based on _archived parameter.
+             *
+             * @param _archived The flag to check if current iterated item is archived.
+             * @returns {*|{type, computed}}
+             * @private
+             */
+            _getItemActionLabel: function (_archived) {
                 return _archived ? this.localize("view") : this.localize("edit");
             },
 
+            /**
+             * Returns the label "archived" or empty, based on _archived parameter.
+             *
+             * @param _archived The flag to check if current iterated item is archived.
+             * @returns {string}
+             * @private
+             */
             _getArchivedLabel: function (_archived) {
                 return _archived ? " (" + this.localize("archived") + ")" : "";
             },
 
+            /**
+             * Returns "no_valid_date" if _validDate is empty and _validDate value if it is not empty.
+             *
+             * @param _validDate The current item validDate property.
+             * @returns {*|{type, computed}}
+             * @private
+             */
             _validDateLabel: function (_validDate) {
                 return _validDate ? _validDate : this.localize("no_valid_date");
             },
 
+            /**
+             * Handles edit action to redirect to "form" element in "EDIT" mode.
+             *
+             * @param _event The current event.
+             * @private
+             */
             _edit: function (_event) {
                 this.fire('change-view', {mode: "EDIT", route: _event.model.route, view: "form"});
             },
 
+            /**
+             * Handles add action to redirect to "form" element in "EDIT" mode.
+             *
+             * @param _event The current event.
+             * @private
+             */
             _add: function (_event) {
                 this.fire('change-view', {mode: "ADD", route: null, view: "form"});
             }
