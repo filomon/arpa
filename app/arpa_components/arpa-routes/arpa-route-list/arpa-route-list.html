@@ -1,0 +1,79 @@
+<link rel="import" href="../../arpa-app-elements/arpa-common-elements.html">
+<link rel="import" href="../../../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../arpa-app-elements/arpa-common-behaviors.html">
+
+<dom-module id="arpa-route-list">
+    <template>
+        <style include="arpa-app-shared-styles"></style>
+        <div class="page-content">
+            <div class="page-header">
+                <h3 class="page-header-left">{{localize('page_header')}}</h3>
+                <paper-input class="page-header-right" value="{{searchText}}" label="{{localize('search')}}"></paper-input>
+            </div>
+            <iron-list id="main_list" class="data-list" items="{{filterArray(routes, searchText, 'source', 'target', 'startTime', 'endTime', 'duration', 'company', 'model')}}" as="route"
+                       scroll-target="document">
+                <template>
+                    <div>
+                        <div class="item" tabindex$="[[tabIndex]]">
+                            <div class="pad">
+                                <div class="primary">[[route.title]]</div>
+                                <div class="secondary dim">
+                                    <b>{{localize('direction')}}:</b> [[route.source]] - [[route.target]]&nbsp|&nbsp
+                                    <b>{{localize('valid_date')}}:</b> [[_validDateLabel(route.validDate)]]&nbsp|&nbsp
+                                    <b>{{localize('time')}}:</b> [[route.startTime]] - [[route.endTime]]&nbsp|&nbsp
+                                    <b>{{localize('duration')}}:</b> [[route.duration]]
+                                </div>
+                                <div class="secondary dim">
+                                    <b>{{localize('company')}}:</b> [[route.company]] | <b>{{localize('bus_model')}}:</b> [[route.model]]
+                                </div>
+                            </div>
+                            <paper-button on-tap="_edit">{{localize('edit')}}</paper-button>
+                        </div>
+                    </div>
+                </template>
+            </iron-list>
+            <paper-fab icon="add" on-tap="_add" disabled="[[!online]]" aria-label="{{localize('add')}}"></paper-fab>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: 'arpa-route-list',
+
+            properties: {
+                routes: {
+                    type: Array,
+                    value: []
+                }
+            },
+
+            behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages, Polymer.ArpaCollections],
+
+            refresh: function () {
+                if (this.user) {
+                    var routesRef = firebaseApp.database().ref("/routes");
+                    routesRef.orderByKey().on("value", function (data) {
+                        this.set("routes", this.queryResultsToArrayObject(data.val()));
+                        setTimeout(function () {
+                            this.updateStyles();
+                        }.bind(this), 50);
+                    }.bind(this));
+                }
+            },
+
+            _validDateLabel: function(_validDate) {
+                return _validDate ? _validDate : this.localize("no_valid_date");
+            },
+
+            _edit: function (_event) {
+                console.log("_event", _event);
+                this.fire('change-view', {mode: "EDIT", route: _event.model.route, view: "form"});
+            },
+
+            _add: function (_event) {
+                this.fire('change-view', {mode: "ADD", route: null, view: "form"});
+            }
+        });
+    </script>
+</dom-module>

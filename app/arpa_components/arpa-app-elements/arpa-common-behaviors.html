@@ -85,6 +85,22 @@
          * @polymerBehavior Polymer.ArpaForms
          */
         Polymer.ArpaForms = {
+            properties: {
+                mode: {
+                    type: String,
+                    value: "NONE",
+                    notify: true
+                }
+            },
+            isNoneMode: function (_mode) {
+                return !_mode || _mode === "NONE";
+            },
+            isEditMode: function (_mode) {
+                return _mode === "EDIT";
+            },
+            isAddMode: function (_mode) {
+                return _mode === "ADD";
+            },
             cloneObject: function (_object) {
                 return JSON.parse(JSON.stringify(_object));
             },
@@ -142,6 +158,24 @@
         };
 
         /**
+         * @polymerBehavior Polymer.ArpaQueries
+         */
+        Polymer.ArpaQueries = {
+            getCurrentUserCompanyName: function () {
+                console.log("this.user.uid", this.user.uid);
+                return firebaseApp.database().ref("/companies").orderByChild("owner").equalTo(this.user.uid).once("value").then(function (data) {
+                    if (data && data.val()) {
+                        var keys = this.getObjectKeys(data.val());
+                        if (keys && keys.length > 0) {
+                            return keys[0];
+                        }
+                    }
+                    return null;
+                }.bind(this));
+            }
+        };
+
+        /**
          * @polymerBehavior Polymer.ArpaCollections
          */
         Polymer.ArpaCollections = {
@@ -157,25 +191,37 @@
                 if (!_searchText) {
                     return _array;
                 }
+                var _searchTextLC = _searchText.toLowerCase();
                 return _array.filter(function (item, index) {
                     var found = false;
                     for (var i = 2; i < _arguments.length && !found; i++) {
                         var propertyValue = item[_arguments[i]];
-                        found = propertyValue && (("" + propertyValue).match(_searchText));
+                        found = propertyValue && (("" + propertyValue).toLowerCase().match(_searchTextLC));
                     }
                     return found;
                 });
             },
-            queryResultsToArrayObject: function (_queryResult) {
+            queryResultsToArrayObject: function (_queryResult, filterFn) {
                 var resultArray = [];
                 if (_queryResult) {
                     for (var key in _queryResult) {
-                        if (_queryResult.hasOwnProperty(key)) {
+                        if (_queryResult.hasOwnProperty(key) && (!filterFn || (typeof filterFn === "function" && filterFn(key, _queryResult[key])))) {
                             if (typeof _queryResult[key] === "object") {
                                 var jsonObject = _queryResult[key];
                                 jsonObject["$id"] = key;
                                 resultArray.push(jsonObject);
                             }
+                        }
+                    }
+                }
+                return resultArray;
+            },
+            getObjectKeys: function (_queryResult, filterFn) {
+                var resultArray = [];
+                if (_queryResult) {
+                    for (var key in _queryResult) {
+                        if (!filterFn || (typeof filterFn === "function" && filterFn(key, _queryResult[key]))) {
+                            resultArray.push(key);
                         }
                     }
                 }

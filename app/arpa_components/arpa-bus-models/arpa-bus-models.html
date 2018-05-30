@@ -1,0 +1,68 @@
+<link rel="import" href="../arpa-app-elements/arpa-common-elements.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/app-route/app-location.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+<link rel="import" href="arpa-bus-model-list/arpa-bus-model-list.html">
+<link rel="import" href="arpa-bus-model-form/arpa-bus-model-form.html">
+
+<dom-module id="arpa-bus-models">
+    <template>
+        <style include="arpa-app-shared-styles"></style>
+        <app-route
+                route="{{route}}"
+                pattern="/:view"
+                data="{{routeData}}"
+                tail="{{subroute}}"></app-route>
+        <iron-pages selected="{{routeData.view}}" attr-for-selected="name">
+            <arpa-bus-model-list id="list"
+                                 name="list"
+                                 route="{{route}}"
+                                 user="{{user}}"
+                                 signed-in="{{signedIn}}"
+                                 online="{{online}}"
+                                 on-change-view="changeView"
+                                 hidden$="[[!signedIn]]">
+            </arpa-bus-model-list>
+            <arpa-bus-model-form id="form"
+                                 name="form"
+                                 route="{{route}}"
+                                 user="{{user}}"
+                                 signed-in="{{signedIn}}"
+                                 online="{{online}}"
+                                 on-change-view="changeView"
+                                 hidden$="[[!signedIn]]">
+            </arpa-bus-model-form>
+        </iron-pages>
+    </template>
+    <script>
+        Polymer({
+            is: 'arpa-bus-models',
+
+            properties: {
+            },
+
+            observers: [
+                '_setupDefaultRoute(route)'
+            ],
+
+            behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages],
+
+            _setupDefaultRoute: function(_route){
+              if (!this.get("routeData.view")) {
+                  this.set("routeData.view", "list");
+              }
+              this.$.list.refresh();
+            },
+
+            changeView: function(_event, _params) {
+                if (_params.view === "list") {
+                    this.$.list.refresh();
+                } else if (_params.view === "form") {
+                    this.$.form.setup(_params.mode, _params.busModel);
+                }
+                this.set("routeData.view", _params.view);
+            }
+        });
+
+    </script>
+</dom-module>

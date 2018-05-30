@@ -2,10 +2,10 @@
 <link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../../bower_components/app-route/app-location.html">
 <link rel="import" href="../../bower_components/app-route/app-route.html">
-<link rel="import" href="arpa-note-list/arpa-note-list.html">
-<link rel="import" href="arpa-note-form/arpa-note-form.html">
+<link rel="import" href="arpa-route-list/arpa-route-list.html">
+<link rel="import" href="arpa-route-form/arpa-route-form.html">
 
-<dom-module id="arpa-notes-example">
+<dom-module id="arpa-routes">
     <template>
         <style include="arpa-app-shared-styles"></style>
         <app-route
@@ -14,7 +14,7 @@
                 data="{{routeData}}"
                 tail="{{subroute}}"></app-route>
         <iron-pages selected="{{routeData.view}}" attr-for-selected="name">
-            <arpa-note-list id="list"
+            <arpa-route-list id="list"
                             name="list"
                             route="{{route}}"
                             user="{{user}}"
@@ -22,8 +22,8 @@
                             online="{{online}}"
                             on-change-view="changeView"
                             hidden$="[[!signedIn]]">
-            </arpa-note-list>
-            <arpa-note-form id="form"
+            </arpa-route-list>
+            <arpa-route-form id="form"
                             name="form"
                             route="{{route}}"
                             user="{{user}}"
@@ -31,29 +31,34 @@
                             online="{{online}}"
                             on-change-view="changeView"
                             hidden$="[[!signedIn]]">
-            </arpa-note-form>
+            </arpa-route-form>
         </iron-pages>
     </template>
     <script>
         Polymer({
-            is: 'arpa-notes-example',
+            is: 'arpa-routes',
 
-            properties: {},
+            properties: {
+            },
 
-            observers: [],
+            observers: [
+                '_setupDefaultRoute(route)'
+            ],
 
             behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages],
 
-            setup: function () {
-                this.set("routeData.view", "list");
+            _setupDefaultRoute: function(_route){
+                if (!this.get("routeData.view")) {
+                    this.set("routeData.view", "list");
+                }
                 this.$.list.refresh();
             },
 
-            changeView: function (_event, _params) {
+            changeView: function(_event, _params) {
                 if (_params.view === "list") {
                     this.$.list.refresh();
                 } else if (_params.view === "form") {
-                    this.$.form.setup(_params.mode, _params.note);
+                    this.$.form.setup(_params.mode, _params.route);
                 }
                 this.set("routeData.view", _params.view);
             }
