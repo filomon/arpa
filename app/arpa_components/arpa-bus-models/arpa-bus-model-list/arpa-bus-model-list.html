@@ -12,7 +12,7 @@
                 <h3 class="page-header-left">{{localize('page_header')}}</h3>
                 <paper-input class="page-header-right" value="{{searchText}}" label="{{localize('search')}}"/>
             </div>
-            <iron-list id="main_list" class="data-list" items="{{filterArray(busModels, searchText, '$id', 'decription')}}" as="busModel"
+            <iron-list id="main_list" class="data-list" items="{{filterArray(busModels, searchText, '$id', 'description')}}" as="busModel"
                        scroll-target="document">
                 <template>
                     <div>
@@ -21,7 +21,7 @@
                             <!--<iron-image class="logo" sizing="contain" src="[[item.logo]]"></iron-image>-->
                             <div class="pad">
                                 <div class="primary">[[busModel.$id]]</div>
-                                <div class="secondary dim">[[busModel.decription]]</div>
+                                <div class="secondary dim">[[busModel.description]]</div>
                             </div>
                             <paper-button on-tap="_edit">{{localize('edit')}}</paper-button>
                         </div>

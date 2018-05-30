@@ -49,12 +49,6 @@
             is: 'arpa-bus-model-form',
 
             properties: {
-                mode: {
-                    type: String,
-//                    ["NONE", "CREATE", "EDIT"]
-                    value: "NONE",
-                    notify: true
-                },
                 busModelId: {
                     type: String,
                     value: null,
@@ -63,36 +57,14 @@
                 busModel: {
                     type: Object,
                     value: {
-                        title: "",
-                        body: ""
+                        title: null,
+                        body: null
                     },
                     notify: true
                 }
             },
 
             behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages, Polymer.ArpaForms],
-
-            observers: [
-//                'setup(mode, busModelId)'
-            ],
-
-            attached: function () {
-                if (this.loadResources) {
-                    this.loadResources(this.resolveUrl('locales.json'));
-                }
-            },
-
-            isNoneMode: function (_mode) {
-                return !_mode || _mode === "NONE";
-            },
-
-            isEditMode: function (_mode) {
-                return _mode === "EDIT";
-            },
-
-            isAddMode: function (_mode) {
-                return _mode === "ADD";
-            },
 
             _getPageHeader: function (_mode) {
                 return this.isEditMode(_mode) ? this.localize('edit_header') : this.isAddMode(_mode) ? this.localize('add_header') : "";
@@ -149,10 +121,6 @@
 
             get recordPath() {
                 return this.busModelsPath + "/" + this.busModelId;
-            },
-
-            get isEditable() {
-                return this.online;
             }
         });
     </script>
