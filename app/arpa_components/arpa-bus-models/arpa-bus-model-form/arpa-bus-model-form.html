@@ -137,7 +137,9 @@
                     this._loadFormData().then(function (data) {
                         this.busModelId = _busModel.$id;
                         this.busModel = this.toEditableObject(_busModel);
-                        this.setPropertiesFromEntity("busModel", ["description"]);
+                        this.setPropertiesFromEntity("busModel", ["description", "trademark", "confort",
+                                                                  "floorsNumber", "seatsNumber", "toiletNumber",
+                                                                  "tvNumber"]);
                         this.clearFieldsValidation(["nameField", "descriptionField"], false);
                     }.bind(this));
                 } else if (this.isAddMode(this.mode)) {
