@@ -1,7 +1,9 @@
 <link rel="import" href="../../arpa-app-elements/arpa-common-elements.html">
 <link rel="import" href="../../../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../../bower_components/vaadin-checkbox/vaadin-checkbox.html">
 <link rel="import" href="../../arpa-app-elements/arpa-common-behaviors.html">
 
 <dom-module id="arpa-route-list">
@@ -10,17 +12,22 @@
         <div class="page-content">
             <div class="page-header">
                 <h3 class="page-header-left">{{localize('page_header')}}</h3>
-                <paper-input class="page-header-right" value="{{searchText}}" label="{{localize('search')}}"></paper-input>
+                <div class="page-header-right">
+                    <paper-input value="{{searchText}}" label="{{localize('search')}}"></paper-input>
+                    <paper-checkbox checked="{{showArchived}}">{{localize('show_archived')}}</paper-checkbox>
+                </div>
             </div>
-            <iron-list id="main_list" class="data-list" items="{{filterArray(routes, searchText, 'source', 'target', 'startTime', 'endTime', 'duration', 'company', 'model')}}" as="route"
+            <iron-list id="main_list" class="data-list"
+                       items="[[filterArray(routes, searchText, showArchived, _filterArchivedRoutes, 'source', 'target', 'startTime', 'endTime', 'duration', 'company', 'model')]]"
+                       as="route"
                        scroll-target="document">
                 <template>
                     <div>
+
                         <div class="item" tabindex$="[[tabIndex]]">
                             <div class="pad">
-                                <div class="primary">[[route.title]]</div>
+                                <div class="primary"><b>{{localize('direction')}}:</b> [[route.source]] - [[route.target]][[_getArchivedLabel(route.archived)]]</div>
                                 <div class="secondary dim">
-                                    <b>{{localize('direction')}}:</b> [[route.source]] - [[route.target]]&nbsp|&nbsp
                                     <b>{{localize('valid_date')}}:</b> [[_validDateLabel(route.validDate)]]&nbsp|&nbsp
                                     <b>{{localize('time')}}:</b> [[route.startTime]] - [[route.endTime]]&nbsp|&nbsp
                                     <b>{{localize('duration')}}:</b> [[route.duration]]
@@ -29,7 +36,7 @@
                                     <b>{{localize('company')}}:</b> [[route.company]] | <b>{{localize('bus_model')}}:</b> [[route.model]]
                                 </div>
                             </div>
-                            <paper-button on-tap="_edit">{{localize('edit')}}</paper-button>
+                            <paper-button on-tap="_edit">{{_getEditLabel(route.archived)}}</paper-button>
                         </div>
                     </div>
                 </template>
@@ -45,15 +52,24 @@
                 routes: {
                     type: Array,
                     value: []
+                },
+                showArchived: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
                 }
             },
 
             behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages, Polymer.ArpaCollections],
 
+            _filterArchivedRoutes: function (_this, item, index) {
+                return _this.showArchived ? true : !item.archived;
+            },
+
             refresh: function () {
                 if (this.user) {
                     var routesRef = firebaseApp.database().ref("/routes");
-                    routesRef.orderByKey().on("value", function (data) {
+                    routesRef.orderByChild("owner").equalTo(this.user.uid).on("value", function (data) {
                         this.set("routes", this.queryResultsToArrayObject(data.val()));
                         setTimeout(function () {
                             this.updateStyles();
@@ -62,12 +78,19 @@
                 }
             },
 
-            _validDateLabel: function(_validDate) {
+            _getEditLabel: function (_archived) {
+                return _archived ? this.localize("view") : this.localize("edit");
+            },
+
+            _getArchivedLabel: function (_archived) {
+                return _archived ? " (" + this.localize("archived") + ")" : "";
+            },
+
+            _validDateLabel: function (_validDate) {
                 return _validDate ? _validDate : this.localize("no_valid_date");
             },
 
             _edit: function (_event) {
-                console.log("_event", _event);
                 this.fire('change-view', {mode: "EDIT", route: _event.model.route, view: "form"});
             },
 

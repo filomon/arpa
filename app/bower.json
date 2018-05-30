@@ -42,6 +42,7 @@
     "vaadin-date-picker": "vaadin/vaadin-date-picker#^3.0.1",
     "vaadin-form-layout": "vaadin/vaadin-form-layout#^2.0.0",
     "vaadin-combo-box": "vaadin/vaadin-combo-box#^4.0.1",
-    "vaadin-checkbox": "vaadin/vaadin-checkbox#^2.1.0"
+    "vaadin-checkbox": "vaadin/vaadin-checkbox#^2.1.0",
+    "paper-checkbox": "PolymerElements/paper-checkbox#^2.0.4"
   }
 }

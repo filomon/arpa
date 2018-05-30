@@ -3,12 +3,15 @@
     "page_header" : "Itinerarios",
     "direction" : "Ruta",
     "valid_date" : "Valides",
+    "archived" : "Archivado",
+    "show_archived" : "Ver Itinerarios Archivados",
     "no_valid_date" : "No Daduca",
     "time" : "Hora",
     "duration" : "Duración",
     "bus_model" : "Modelo",
     "company" : "Compania",
     "edit" : "Editar",
+    "view" : "Ver",
     "add" : "Agregar Itinerario",
     "search" : "Buscar"
   }

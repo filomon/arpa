@@ -2,7 +2,11 @@
   "es": {
     "edit_header" : "Editar Itinerario",
     "add_header" : "Agregar Itinerario",
-    "delete" : "Eliminar",
+    "view_header" : "Ver Itinerario",
+    "archived" : "Archivado",
+    "unarchived" : "Desarchivado",
+    "archive" : "Archivar",
+    "unarchive" : "Desarchivar",
     "save" : "Guardar",
     "cancel" : "Cancelar",
     "company" : "Compania",
@@ -16,7 +20,8 @@
     "duration" : "Duración",
     "error_invalid" : "Valor invalido.",
     "unsupported_action" : "Acción invalida.",
-    "success_add" : "Itinerario fue agregada correctamente.",
-    "success_edit" : "Itinerario fue modificada correctamente."
+    "success_add" : "El itinerario fue agregada correctamente.",
+    "success_edit" : "El itinerario fue modificada correctamente.",
+    "success_archive" : "El itinerario fue {action} correctamente."
   }
 }

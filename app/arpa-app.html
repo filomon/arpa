@@ -150,12 +150,17 @@
                 } else {
                     this.set("signedIn", false);
                 }
-                ;
             },
 
+            /**
+             * Executes "setup" function if the selected page contains it.
+             *
+             * @param _event
+             * @private
+             */
             _setupSelectedPage: function(_event) {
                 var elementId = _event.currentTarget.getAttribute("value");
-                if (this.$[elementId] !== null && typeof this.$[elementId].setup === "function") {
+                if (this.$[elementId] && this.$[elementId].setup && typeof this.$[elementId].setup === "function") {
                     this.$[elementId].setup();
                 }
             },

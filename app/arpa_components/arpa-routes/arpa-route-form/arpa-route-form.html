@@ -12,20 +12,23 @@
     <template>
         <style include="arpa-app-shared-styles"></style>
         <div class="page-content">
-            <h3>[[_getPageHeader(mode)]]</h3>
+            <h3>[[_getPageHeader(mode, route.archived)]]</h3>
             <div class="form-content">
                 <vaadin-form-layout>
 
                     <vaadin-text-field label="{{localize('company')}}" value="{{route.company}}" readonly>
                     </vaadin-text-field>
 
-                    <vaadin-combo-box id="modelField" label="{{localize('model')}}" value="{{route.model}}" items="[[models]]" required>
+                    <vaadin-combo-box id="modelField" label="{{localize('model')}}" value="{{route.model}}" items="[[models]]" required
+                                      readonly="[[route.archived]]">
                     </vaadin-combo-box>
 
-                    <vaadin-combo-box id="sourceField" label="{{localize('source')}}" value="{{route.source}}" items="[[cities]]" required>
+                    <vaadin-combo-box id="sourceField" label="{{localize('source')}}" value="{{route.source}}" items="[[cities]]" required
+                                      readonly="[[route.archived]]">
                     </vaadin-combo-box>
 
-                    <vaadin-combo-box id="targetField" label="{{localize('target')}}" value="{{route.target}}" items="[[cities]]" required>
+                    <vaadin-combo-box id="targetField" label="{{localize('target')}}" value="{{route.target}}" items="[[cities]]" required
+                                      readonly="[[route.archived]]">
                     </vaadin-combo-box>
 
                     <paper-input id="startTimeField"
@@ -34,7 +37,8 @@
                                  error-message="{{localize('error_invalid')}}"
                                  label="{{localize('start_time')}}"
                                  required="true"
-                                 auto-validate="true">
+                                 auto-validate="true"
+                                 readonly="[[route.archived]]">
                     </paper-input>
 
                     <paper-input id="endTimeField"
@@ -43,27 +47,34 @@
                                  error-message="{{localize('error_invalid')}}"
                                  label="{{localize('end_time')}}"
                                  required="true"
-                                 auto-validate="true">
+                                 auto-validate="true"
+                                 readonly="[[route.archived]]">
                     </paper-input>
 
                     <vaadin-text-field label="{{localize('duration')}}" value="{{route.duration}}" readonly>
                     </vaadin-text-field>
 
-                    <vaadin-checkbox checked="{{hasNoValidDate}}" on-change="_handleHasNoValidDateValue">{{localize('has_no_valid_date')}}</vaadin-checkbox>
+                    <vaadin-checkbox checked="{{hasNoValidDate}}" on-change="_handleHasNoValidDateValue"
+                                     disabled="[[route.archived]]">{{localize('has_no_valid_date')}}
+                    </vaadin-checkbox>
 
                     <vaadin-date-picker id="validDateField"
                                         value="{{route.validDate}}"
                                         error-message="{{localize('error_invalid')}}"
-                                        label="{{localize('start_date')}}"
+                                        label="{{localize('valid_date')}}"
                                         auto-validate="true"
                                         hidden$="[[hasNoValidDate]]"
-                                        required="[[!hasNoValidDate]]"></vaadin-date-picker>
+                                        required="[[!hasNoValidDate]]"
+                                        readonly="[[route.archived]]"></vaadin-date-picker>
 
 
                 </vaadin-form-layout>
             </div>
             <div class="page-buttons">
-                <paper-button raised on-tap="save" hidden$="[[isNoneMode(mode)]]">{{localize('save')}}</paper-button>
+                <paper-button id="archivedBtn" raised on-tap="toggleArchive" class="orange" hidden$="[[_hideArchiveAction(mode, route.archived)]]">
+                    {{localize('archive')}}
+                </paper-button>
+                <paper-button raised on-tap="save" hidden$="[[_hideSaveAction(mode, route.archived)]]">{{localize('save')}}</paper-button>
                 <paper-button raised on-tap="cancel" hidden$="[[isNoneMode(mode)]]">{{localize('cancel')}}</paper-button>
             </div>
         </div>
@@ -107,6 +118,14 @@
                 "_computeDuration(route.startTime, route.endTime)"
             ],
 
+            _hideArchiveAction: function (_mode, _archived) {
+                return _archived || !this.isEditMode(_mode);
+            },
+
+            _hideSaveAction: function (_mode, _archived) {
+                return _archived || this.isNoneMode(_mode);
+            },
+
             _computeDuration: function (_startTime, _endTime) {
                 if (_startTime && _endTime) {
                     var timeStart = new Date("03/25/2018 " + _startTime + ":00");
@@ -128,8 +147,17 @@
                 }
             },
 
-            _getPageHeader: function (_mode) {
-                return this.isEditMode(_mode) ? this.localize('edit_header') : this.isAddMode(_mode) ? this.localize('add_header') : "";
+            /**
+             * Returns the page header label based on "mode" and "archived" parameters;
+             *
+             * @param _mode
+             * @param _archived
+             * @returns {*|{type, computed}}
+             * @private
+             */
+            _getPageHeader: function (_mode, _archived) {
+                var labelKey = _archived ? "view_header" : this.isEditMode(_mode) ? "edit_header" : this.isAddMode(_mode) ? "add_header" : "view_header";
+                return this.localize(labelKey);
             },
 
             _loadAssociatedData: function () {
@@ -162,13 +190,10 @@
                         this.routeId = _route.$id;
                         this.route = this.toEditableObject(_route);
                         this.hasNoValidDate = !this.route.validDate;
-                        console.log("A: this.company: ", this.company, "this.route.company", this.route.company);
                         if (!this.route.company) {
                             this.route.company = this.company;
                         }
-
-                        console.log("B: this.company: ", this.company, "this.route", this.route);
-                        this.setPropertiesFromEntity("route", ["company", "model", "source", "target", "validDate", "startTime", "endTime"]);
+                        this.setPropertiesFromEntity("route", ["company", "model", "source", "target", "validDate", "startTime", "endTime", "archived"]);
                         this.clearFieldsValidation(["modelField", "sourceField", "targetField", "validDateField", "startTimeField", "endTimeField"], false);
                     }.bind(this));
                 } else if (this.isAddMode(this.mode)) {
@@ -178,19 +203,34 @@
                             validDate: null,
                             startTime: "",
                             endTime: "",
-                            company: this.company
+                            company: this.company,
+                            owner: this.user.uid,
+                            archived: false
                         };
                         this.hasNoValidDate = true;
-                        this.setPropertiesFromEntity("route", ["company", "model", "source", "target", "validDate", "startTime", "endTime"]);
+                        this.setPropertiesFromEntity("route", ["company", "model", "source", "target", "validDate", "startTime", "endTime", "owner", "archived"]);
                         this.clearFieldsValidation(["modelField", "sourceField", "targetField", "validDateField", "startTimeField", "endTimeField"], true);
                     }.bind(this));
                 }
                 return Promise.resolve();
             },
 
+            toggleArchive: function (_event) {
+                firebaseApp.database().ref(this.recordPath).child("archived")
+                    .transaction(function (archived) {
+                        this.set("route.archived", !archived);
+                        return !archived;
+                    }.bind(this))
+                    .then(function (data) {
+                        var archived = this.get("route.archived");
+                        this.showSuccessMessage(this.localize("success_edit", "action", this.localize(archived ? "archived" : "unarchived")));
+                        this.get("route.archived")
+                    }.bind(this));
+            },
+
             save: function (_event) {
                 if (this.performFieldsValidation(["modelField", "sourceField", "targetField", "validDateField", "startTimeField", "endTimeField"])) {
-                    this.pushPropertiesToEntity("route", ["company", "model", "source", "target", "validDate", "startTime", "endTime"]);
+                    this.pushPropertiesToEntity("route", ["company", "model", "source", "target", "validDate", "startTime", "endTime", "owner", "archived"]);
 
                     if (this.isAddMode(this.mode)) {
                         var recordRef = firebaseApp.database().ref(this.routesPath);
@@ -218,10 +258,6 @@
 
             get recordPath() {
                 return this.routesPath + "/" + this.routeId;
-            },
-
-            get isEditable() {
-                return this.online;
             }
         });
     </script>

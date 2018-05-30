@@ -112,9 +112,13 @@
             performFieldsValidation: function (_fieldIds) {
                 var valid = true;
                 for (var i = 0; i < _fieldIds.length; i++) {
-                    this.$[_fieldIds[i]].validate();
-                    if (this.$[_fieldIds[i]].invalid) {
-                        valid = false;
+                    if (this.$[_fieldIds[i]]) {
+                        this.$[_fieldIds[i]].validate();
+                        if (this.$[_fieldIds[i]].invalid) {
+                            valid = false;
+                        }
+                    } else {
+                        console.log("Field not found: " + _fieldIds[i]);
                     }
                 }
                 return valid;
@@ -136,12 +140,8 @@
                 for (var i = 0; i < _propertyNames.length; i++) {
                     var propertyName = _propertyNames[i];
                     var propertyValue = jsonObject[propertyName];
-//                    if (typeof propertyValue !== 'undefined')
-                    {
-                        var propertyPath = _objectName + "." + propertyName;
-                        console.log("propertyPath: ", propertyPath, "propertyValue: ", propertyValue)
-                        this.set(propertyPath, propertyValue);
-                    }
+                    var propertyPath = _objectName + "." + propertyName;
+                    this.set(propertyPath, propertyValue);
                 }
             },
             pushPropertiesToEntity: function (_objectName, _propertyNames) {
@@ -162,7 +162,6 @@
          */
         Polymer.ArpaQueries = {
             getCurrentUserCompanyName: function () {
-                console.log("this.user.uid", this.user.uid);
                 return firebaseApp.database().ref("/companies").orderByChild("owner").equalTo(this.user.uid).once("value").then(function (data) {
                     if (data && data.val()) {
                         var keys = this.getObjectKeys(data.val());
@@ -187,19 +186,20 @@
                 }
             },
             filterArray: function (_array, _searchText) {
-                var _arguments = arguments;
-                if (!_searchText) {
-                    return _array;
-                }
                 var _searchTextLC = _searchText.toLowerCase();
+                var _arguments = arguments;
                 return _array.filter(function (item, index) {
                     var found = false;
                     for (var i = 2; i < _arguments.length && !found; i++) {
-                        var propertyValue = item[_arguments[i]];
-                        found = propertyValue && (("" + propertyValue).toLowerCase().match(_searchTextLC));
+                        if (typeof _arguments[i] === "function") {
+                            found =  _arguments[i](this, item, index);
+                        } else if (_searchTextLC && typeof _arguments[i] === "string") {
+                            var propertyValue = item[_arguments[i]];
+                            found = propertyValue && (("" + propertyValue).toLowerCase().match(_searchTextLC));
+                        }
                     }
                     return found;
-                });
+                }.bind(this));
             },
             queryResultsToArrayObject: function (_queryResult, filterFn) {
                 var resultArray = [];
