@@ -30,7 +30,7 @@
                                     [[route.target]][[_getArchivedLabel(route.archived)]]
                                 </div>
                                 <div class="secondary dim">
-                                    <b>{{localize('valid_date')}}:</b> [[_validDateLabel(route.validDate)]]&nbsp|&nbsp
+                                    <b>{{localize('valid_date')}}:</b> [[_getValidDateLabel(route.validDate)]]&nbsp|&nbsp
                                     <b>{{localize('time')}}:</b> [[route.startTime]] - [[route.endTime]]&nbsp|&nbsp
                                     <b>{{localize('duration')}}:</b> [[route.duration]]
                                 </div>
@@ -121,7 +121,7 @@
              * @returns {*|{type, computed}}
              * @private
              */
-            _validDateLabel: function (_validDate) {
+            _getValidDateLabel: function (_validDate) {
                 return _validDate ? _validDate : this.localize("no_valid_date");
             },
 
