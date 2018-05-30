@@ -38,23 +38,18 @@
         Polymer({
             is: 'arpa-notes-example',
 
-            properties: {
-            },
+            properties: {},
 
-            observers: [
-                '_setupDefaultRoute(route)'
-            ],
+            observers: [],
 
             behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages],
 
-            _setupDefaultRoute: function(_route){
-              if (!this.get("routeData.view")) {
-                  this.set("routeData.view", "list");
-              }
-              this.$.list.refresh();
+            setup: function () {
+                this.set("routeData.view", "list");
+                this.$.list.refresh();
             },
 
-            changeView: function(_event, _params) {
+            changeView: function (_event, _params) {
                 if (_params.view === "list") {
                     this.$.list.refresh();
                 } else if (_params.view === "form") {

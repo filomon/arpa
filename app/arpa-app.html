@@ -56,32 +56,30 @@
                 </app-toolbar>
             </app-header>
             <app-drawer-layout id="drawerLayout">
-                <app-drawer id="drawer" slot="drawer" position="left"
-                            style="transition-duration: 200ms; touch-action: pan-y;" persistent opened>
-                    <paper-listbox attr-for-selected="value" selected="{{routeData.page}}"
-                                   fallback-selection="search-element">
-                        <paper-item value="search-element">
+                <app-drawer id="drawer" slot="drawer" position="left" style="transition-duration: 200ms; touch-action: pan-y;" persistent opened>
+                    <paper-listbox attr-for-selected="value" selected="{{routeData.page}}" fallback-selection="search-element">
+                        <paper-item value="search" on-tap="_setupSelectedPage">
                             <iron-icon icon="search"></iron-icon>
                             <label>{{localize('search_routes')}}</label>
                         </paper-item>
                         <template is="dom-if" if="{{signedIn}}">
-                            <paper-item value="notes-example">
+                            <paper-item value="notes" on-tap="_setupSelectedPage">
                                 <iron-icon icon="icons:speaker-notes"></iron-icon>
                                 <label>{{localize('note_example')}}</label>
                             </paper-item>
-                            <paper-item value="user-roles">
+                            <paper-item value="userroles" on-tap="_setupSelectedPage">
                                 <iron-icon icon="social:group"></iron-icon>
                                 <label>{{localize('user_roles')}}</label>
                             </paper-item>
-                            <paper-item value="bus-models">
+                            <paper-item value="busmodels" on-tap="_setupSelectedPage">
                                 <iron-icon icon="maps:directions-bus"></iron-icon>
                                 <label>{{localize('bus_models')}}</label>
                             </paper-item>
-                            <paper-item value="my-routes">
+                            <paper-item value="routes" on-tap="_setupSelectedPage">
                                 <iron-icon icon="maps:directions"></iron-icon>
                                 <label>{{localize('my_routes')}}</label>
                             </paper-item>
-                            <paper-item value="my-company">
+                            <paper-item value="mycompany" on-tap="_setupSelectedPage">
                                 <iron-icon icon="communication:contacts"></iron-icon>
                                 <label>{{localize('my_company')}}</label>
                             </paper-item>
@@ -94,41 +92,41 @@
                                 attr-for-selected="name"
                                 selected-attribute="visible"
                                 hidden$="[[!online]]">
-                        <arpa-search-element id="search_element"
-                                             name="search-element"
+                        <arpa-search-element id="search"
+                                             name="search"
                                              route="{{subroute}}">
                         </arpa-search-element>
-                        <arpa-notes-example id="notes-example"
-                                            name="notes-example"
+                        <arpa-notes-example id="notes"
+                                            name="notes"
                                             route="{{subroute}}"
                                             user="{{user}}"
                                             signed-in="{{signedIn}}"
                                             online="{{online}}"
                                             hidden$="[[!signedIn]]">
                         </arpa-notes-example>
-                        <arpa-company-element id="mycompany-element"
-                                              name="mycompany-element"
+                        <arpa-company-element id="mycompany"
+                                              name="mycompany"
                                               route="{{subroute}}"
                                               user="{{user}}"
                                               signed-in="{{signedIn}}"
                                               online="{{online}}"
                                               hidden$="[[!signedIn]]">
                         </arpa-company-element>
-                        <arpa-bus-models id="bus-model"
-                                         name="bus-models"
+                        <arpa-bus-models id="busmodels"
+                                         name="busmodels"
                                          route="{{subroute}}"
                                          user="{{user}}"
                                          signed-in="{{signedIn}}"
                                          online="{{online}}"
                                          hidden$="[[!signedIn]]">
                         </arpa-bus-models>
-                        <arpa-routes id="my-routes"
-                                            name="my-routes"
-                                            route="{{subroute}}"
-                                            user="{{user}}"
-                                            signed-in="{{signedIn}}"
-                                            online="{{online}}"
-                                            hidden$="[[!signedIn]]">
+                        <arpa-routes id="routes"
+                                     name="routes"
+                                     route="{{subroute}}"
+                                     user="{{user}}"
+                                     signed-in="{{signedIn}}"
+                                     online="{{online}}"
+                                     hidden$="[[!signedIn]]">
                         </arpa-routes>
                     </iron-pages>
                 </div>
@@ -156,7 +154,7 @@
                     this._setupUserSettings(_user);
                 }.bind(this));
                 var connectedRef = firebaseApp.database().ref(".info/connected");
-                connectedRef.on("value", function(snap) {
+                connectedRef.on("value", function (snap) {
                     this.online = (snap.val() === true);
                 }.bind(this));
                 window.Arpa.defaultToast = this.$.defaultToast;
@@ -173,6 +171,13 @@
                 ;
             },
 
+            _setupSelectedPage: function(_event) {
+                var elementId = _event.currentTarget.getAttribute("value");
+                if (this.$[elementId] !== null && typeof this.$[elementId].setup === "function") {
+                    this.$[elementId].setup();
+                }
+            },
+
             _computeLockIcon: function (_signedIn) {
                 return _signedIn ? 'lock-open' : 'lock';
             },
@@ -182,7 +187,7 @@
             },
 
             _isLoginRequired: function (_page) {
-                return _page === "notes-example";
+                return _page === "notes_example";
             },
 
             _drawerToggle: function (_event) {
