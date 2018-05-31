@@ -294,7 +294,7 @@
                     for (var criteriaIndex = 2; criteriaIndex < _arguments.length && !found; criteriaIndex++) {
                         if (typeof _arguments[criteriaIndex] === "function") {
                             found = _arguments[criteriaIndex](this, item, index);
-                        } else if (_searchTextLC && typeof _arguments[criteriaIndex] === "string") {
+                        } else if (typeof _arguments[criteriaIndex] === "string") {
                             var propertyValue = item[_arguments[criteriaIndex]];
                             found = propertyValue && (("" + propertyValue).toLowerCase().match(_searchTextLC));
                         }
