@@ -18,6 +18,8 @@
 <link rel="import" href="arpa_components/arpa-app-elements/arpa-common-elements.html">
 <link rel="import" href="arpa_components/arpa-notes-example/arpa-notes-example.html">
 <link rel="import" href="arpa_components/arpa-search-element/arpa-search-element.html">
+<link rel="import" href="arpa_components/arpa-company-example/arpa-mycompany-element.html">
+<link rel="import" href="arpa_components/arpa-bus-models/arpa-bus-models.html">
 <link rel="import" href="arpa_components/arpa-routes/arpa-routes.html">
 
 <dom-module id="arpa-app">
@@ -26,7 +28,7 @@
         </style>
         <paper-toast id="defaultToast" text=""></paper-toast>
         <paper-toast id="persistentToast" duration="0" text="">
-            <paper-button onclick="persistentToast.toggle()" class="yellow-button">{{localize("close")}}</paper-button>
+            <paper-button onclick="Arpa.persistentToast.close()" class="yellow-button">{{localize("close")}}</paper-button>
         </paper-toast>
         <app-location route="{{route}}"></app-location>
         <app-route route="{{route}}"
@@ -102,6 +104,22 @@
                                             online="{{online}}"
                                             hidden$="[[!signedIn]]">
                         </arpa-notes-example>
+                        <arpa-company-element id="mycompany"
+                                              name="mycompany"
+                                              route="{{subroute}}"
+                                              user="{{user}}"
+                                              signed-in="{{signedIn}}"
+                                              online="{{online}}"
+                                              hidden$="[[!signedIn]]">
+                        </arpa-company-element>
+                        <arpa-bus-models id="busmodels"
+                                         name="busmodels"
+                                         route="{{subroute}}"
+                                         user="{{user}}"
+                                         signed-in="{{signedIn}}"
+                                         online="{{online}}"
+                                         hidden$="[[!signedIn]]">
+                        </arpa-bus-models>
                         <arpa-routes id="routes"
                                      name="routes"
                                      route="{{subroute}}"
@@ -277,5 +295,6 @@
                     }.bind(this));
             }
         });
+
     </script>
 </dom-module>
