@@ -19,6 +19,7 @@
     "end_time" : "Hora Llegada",
     "duration" : "Duración",
     "reservation_sheets" : "Planillas de Reserva",
+    "reservation_sheet_message" : "Solo planillas con reservas son mostrados.",
     "reservation_sheet_date" : "Fecha",
     "reservation_sheet_reserved_seats" : "Asientos Reservados",
     "reservation_sheet_available_seats" : "Asientos Disponibles",

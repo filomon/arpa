@@ -74,49 +74,62 @@
                 </vaadin-form-layout>
             </div>
             <template is="dom-if" if="{{isEditMode(mode)}}">
-            <div class="form-content">
-                <hr/>
-                <div class="list-header">
-                    <h3 class="list-header-left">{{localize('reservation_sheets')}}</h3>
-                    <div class="list-header-right">
-                        <paper-input value="{{searchText}}" label="{{localize('search')}}"></paper-input>
+                <div class="form-content">
+                    <hr/>
+                    <div class="list-header">
+                        <div class="list-header-left">
+                            <h3>{{localize('reservation_sheets')}}</h3>
+                            <span class="text-info">
+                                <iron-icon icon="icons:info"></iron-icon>
+                                {{localize('reservation_sheet_message')}}
+                            </span>
+                        </div>
+                        <div class="list-header-right">
+                        </div>
                     </div>
+                    <vaadin-grid theme="row-dividers" items="{{reservationSheets}}" class="data-table-grid"
+                                 column-reordering-allowed multi-sort height-by-rows>
+
+                        <vaadin-grid-column width="25%">
+                            <template class="header">
+                                <vaadin-grid-sorter path="date">[[localize('reservation_sheet_date')]]</vaadin-grid-sorter>
+                                <br/>
+                                <vaadin-grid-filter path="date"></vaadin-grid-filter>
+                            </template>
+                            <template>[[item.date]]</template>
+                        </vaadin-grid-column>
+
+                        <vaadin-grid-column width="25%">
+                            <template class="header">
+                                <vaadin-grid-sorter path="reservedSeats">[[localize('reservation_sheet_reserved_seats')]]</vaadin-grid-sorter>
+                                <br/>
+                                <vaadin-grid-filter path="reservedSeats"></vaadin-grid-filter>
+                            </template>
+                            <template>[[item.reservedSeats]]</template>
+                        </vaadin-grid-column>
+
+                        <vaadin-grid-column width="25%">
+                            <template class="header">
+                                <vaadin-grid-sorter path="availableSeats">[[localize('reservation_sheet_available_seats')]]</vaadin-grid-sorter>
+                                <br/>
+                                <vaadin-grid-filter path="availableSeats"></vaadin-grid-filter>
+                            </template>
+                            <template>[[item.availableSeats]]</template>
+                        </vaadin-grid-column>
+
+                        <vaadin-grid-column width="25%">
+                            <template class="header">
+                                <vaadin-grid-sorter path="state">[[localize('reservation_sheet_state')]]</vaadin-grid-sorter>
+                                <br/>
+                                <vaadin-grid-filter path="localizedState"></vaadin-grid-filter>
+                            </template>
+                            <template>
+                                <iron-icon icon="image:lens" class$="[[_stateClass(item.state)]]"></iron-icon>&nbsp;[[localize(item.state)]]
+                            </template>
+                        </vaadin-grid-column>
+
+                    </vaadin-grid>
                 </div>
-                <vaadin-grid theme="row-dividers" items="{{filterArray(reservationSheets, searchText, 'date', 'reservedSeats', 'availableSeats')}}"
-                             column-reordering-allowed multi-sort height-by-rows>
-
-                    <vaadin-grid-column width="25%">
-                        <template class="header">
-                            <vaadin-grid-sorter path="date">[[localize('reservation_sheet_date')]]</vaadin-grid-sorter>
-                        </template>
-                        <template>[[item.date]]</template>
-                    </vaadin-grid-column>
-
-                    <vaadin-grid-column width="25%">
-                        <template class="header">
-                            <vaadin-grid-sorter path="reservedSeats">[[localize('reservation_sheet_reserved_seats')]]</vaadin-grid-sorter>
-                        </template>
-                        <template>[[item.reservedSeats]]</template>
-                    </vaadin-grid-column>
-
-                    <vaadin-grid-column width="25%">
-                        <template class="header">
-                            <vaadin-grid-sorter path="availableSeats">[[localize('reservation_sheet_available_seats')]]</vaadin-grid-sorter>
-                        </template>
-                        <template>[[item.availableSeats]]</template>
-                    </vaadin-grid-column>
-
-                    <vaadin-grid-column width="25%">
-                        <template class="header">
-                            <vaadin-grid-sorter path="state">[[localize('reservation_sheet_state')]]</vaadin-grid-sorter>
-                        </template>
-                        <template>
-                            <iron-icon icon="image:lens" class$="[[_stateClass(item.state)]]"></iron-icon>&nbsp;[[localize(item.state)]]
-                        </template>
-                    </vaadin-grid-column>
-
-                </vaadin-grid>
-            </div>
             </template>
             <div class="page-buttons">
                 <paper-button id="archivedBtn" raised on-tap="toggleArchive" class="orange" hidden$="[[_hideArchiveAction(mode, route.archived)]]">
@@ -170,7 +183,7 @@
                 "_computeDuration(route.startTime, route.endTime)"
             ],
 
-            _stateClass: function(_state) {
+            _stateClass: function (_state) {
                 return _state ? "state_" + _state.toLowerCase() : "state_undefined";
             },
 
@@ -294,7 +307,11 @@
                         firebaseApp.database().ref("/reservation_sheets/" + this.routeId).orderByChild("date").once("value")
                             .then(function (data) {
                                 console.log("data.val()", data.val());
-                                this.set("reservationSheets", this.queryResultsToArrayObject(data.val()));
+                                var reservationSheetsTemp = this.queryResultsToArrayObject(data.val());
+                                for (var i = 0; reservationSheetsTemp && i < reservationSheetsTemp.length; i++) {
+                                    reservationSheetsTemp[i].localizedState = this.localize(reservationSheetsTemp[i].state);
+                                }
+                                this.set("reservationSheets", reservationSheetsTemp);
 
                             }.bind(this));
                     }.bind(this));
