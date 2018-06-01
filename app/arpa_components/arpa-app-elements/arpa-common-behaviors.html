@@ -287,6 +287,9 @@
              * @param _searchText The search text.
              */
             filterArray: function (_array, _searchText) {
+                if (null === _array) {
+                    return [];
+                }
                 var _searchTextLC = _searchText.toLowerCase();
                 var _arguments = arguments;
                 return _array.filter(function (item, index) {

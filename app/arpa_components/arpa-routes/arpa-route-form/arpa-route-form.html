@@ -1,11 +1,14 @@
 <link rel="import" href="../../arpa-app-elements/arpa-common-elements.html">
 <link rel="import" href="../../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../../bower_components/iron-icons/image-icons.html">
 <link rel="import" href="../../../bower_components/vaadin-text-field/vaadin-text-field.html">
 <link rel="import" href="../../../bower_components/vaadin-form-layout/vaadin-form-layout.html">
 <link rel="import" href="../../../bower_components/vaadin-date-picker/vaadin-date-picker.html">
 <link rel="import" href="../../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
 <link rel="import" href="../../../bower_components/vaadin-checkbox/vaadin-checkbox.html">
+<link rel="import" href="../../../bower_components/vaadin-grid/all-imports.html">
 <link rel="import" href="../../arpa-app-elements/arpa-common-behaviors.html">
 
 <dom-module id="arpa-route-form">
@@ -70,6 +73,64 @@
 
                 </vaadin-form-layout>
             </div>
+            <template is="dom-if" if="{{isEditMode(mode)}}">
+                <div class="form-content">
+                    <hr/>
+                    <div class="list-header">
+                        <div class="list-header-left">
+                            <h3>{{localize('reservation_sheets')}}</h3>
+                            <span class="text-info">
+                                <iron-icon icon="icons:info"></iron-icon>
+                                {{localize('reservation_sheet_message')}}
+                            </span>
+                        </div>
+                        <div class="list-header-right">
+                        </div>
+                    </div>
+                    <vaadin-grid theme="row-dividers" items="{{reservationSheets}}" class="data-table-grid"
+                                 column-reordering-allowed multi-sort height-by-rows>
+
+                        <vaadin-grid-column width="25%">
+                            <template class="header">
+                                <vaadin-grid-sorter path="date">[[localize('reservation_sheet_date')]]</vaadin-grid-sorter>
+                                <br/>
+                                <vaadin-grid-filter path="date"></vaadin-grid-filter>
+                            </template>
+                            <template>[[item.date]]</template>
+                        </vaadin-grid-column>
+
+                        <vaadin-grid-column width="25%">
+                            <template class="header">
+                                <vaadin-grid-sorter path="reservedSeats">[[localize('reservation_sheet_reserved_seats')]]</vaadin-grid-sorter>
+                                <br/>
+                                <vaadin-grid-filter path="reservedSeats"></vaadin-grid-filter>
+                            </template>
+                            <template>[[item.reservedSeats]]</template>
+                        </vaadin-grid-column>
+
+                        <vaadin-grid-column width="25%">
+                            <template class="header">
+                                <vaadin-grid-sorter path="availableSeats">[[localize('reservation_sheet_available_seats')]]</vaadin-grid-sorter>
+                                <br/>
+                                <vaadin-grid-filter path="availableSeats"></vaadin-grid-filter>
+                            </template>
+                            <template>[[item.availableSeats]]</template>
+                        </vaadin-grid-column>
+
+                        <vaadin-grid-column width="25%">
+                            <template class="header">
+                                <vaadin-grid-sorter path="state">[[localize('reservation_sheet_state')]]</vaadin-grid-sorter>
+                                <br/>
+                                <vaadin-grid-filter path="localizedState"></vaadin-grid-filter>
+                            </template>
+                            <template>
+                                <iron-icon icon="image:lens" class$="[[_stateClass(item.state)]]"></iron-icon>&nbsp;[[localize(item.state)]]
+                            </template>
+                        </vaadin-grid-column>
+
+                    </vaadin-grid>
+                </div>
+            </template>
             <div class="page-buttons">
                 <paper-button id="archivedBtn" raised on-tap="toggleArchive" class="orange" hidden$="[[_hideArchiveAction(mode, route.archived)]]">
                     {{localize('archive')}}
@@ -109,6 +170,10 @@
                 hasNoValidDate: {
                     type: Boolean,
                     value: false
+                },
+                reservationSheets: {
+                    type: Array,
+                    value: null
                 }
             },
 
@@ -117,6 +182,10 @@
             observers: [
                 "_computeDuration(route.startTime, route.endTime)"
             ],
+
+            _stateClass: function (_state) {
+                return _state ? "state_" + _state.toLowerCase() : "state_undefined";
+            },
 
             /**
              * Defines if Archive button is not visible.
@@ -222,6 +291,7 @@
                 //Setup default values
                 console.log("route", this.route);
                 this.routeId = null;
+                this.reservationSheets = null;
                 if (this.isNoneMode(this.mode)) {
                     this.route = null;
                 } else if (this.isEditMode(this.mode)) {
@@ -234,6 +304,16 @@
                         }
                         this.setPropertiesFromEntity("route", ["company", "model", "source", "target", "validDate", "startTime", "endTime", "archived"]);
                         this.clearFieldsValidation(["modelField", "sourceField", "targetField", "validDateField", "startTimeField", "endTimeField"], false);
+                        firebaseApp.database().ref("/reservation_sheets/" + this.routeId).orderByChild("date").once("value")
+                            .then(function (data) {
+                                console.log("data.val()", data.val());
+                                var reservationSheetsTemp = this.queryResultsToArrayObject(data.val());
+                                for (var i = 0; reservationSheetsTemp && i < reservationSheetsTemp.length; i++) {
+                                    reservationSheetsTemp[i].localizedState = this.localize(reservationSheetsTemp[i].state);
+                                }
+                                this.set("reservationSheets", reservationSheetsTemp);
+
+                            }.bind(this));
                     }.bind(this));
                 } else if (this.isAddMode(this.mode)) {
                     this._loadAssociatedData().then(function (data) {
