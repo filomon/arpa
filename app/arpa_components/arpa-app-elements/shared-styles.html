@@ -9,8 +9,7 @@
         <style>
             :host {
                 display: block;
-                background-color: #e8e8e8;
-                height: 100vh;
+                height: auto;
                 @apply --paper-font-common-base;
                 --paper-fab-background: var(--paper-teal-500);
             }
@@ -38,21 +37,21 @@
                 padding: 10px;
             }
 
-            .page-header {
+            .page-header, .list-header {
                 width: 100%;
                 content: "";
                 display: table;
                 clear: both;
             }
 
-            .page-header .page-header-left {
+            .page-header .page-header-left, .list-header .list-header-left {
                 padding: 5px 5px 5px 0;
                 width: calc(50% - 5px);
                 float: left;
 
             }
 
-            .page-header .page-header-right {
+            .page-header .page-header-right, .list-header .list-header-right {
                 padding: 5px 0 5px 0;
                 width: calc(50% - 5px);
                 float: left;
@@ -178,6 +177,22 @@
 
             .error-message {
                 background-color: var(--paper-red-500);
+            }
+
+            .state_available {
+                color: var(--paper-green-300);
+            }
+
+            .state_sold_out {
+                color: var(--paper-orange-300);
+            }
+
+            .state_closed {
+                color: var(--paper-purple-300);
+            }
+
+            .state_canceled {
+                color: var(--paper-blue-300);
             }
 
             /*Notes Styles*/
