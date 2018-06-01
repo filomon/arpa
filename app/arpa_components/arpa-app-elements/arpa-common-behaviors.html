@@ -290,8 +290,8 @@
                 var _searchTextLC = _searchText.toLowerCase();
                 var _arguments = arguments;
                 return _array.filter(function (item, index) {
-                    var found = false;
-                    for (var criteriaIndex = 2; criteriaIndex < _arguments.length && !found; criteriaIndex++) {
+                    var found = true;
+                    for (var criteriaIndex = 2; criteriaIndex < _arguments.length && found; criteriaIndex++) {
                         if (typeof _arguments[criteriaIndex] === "function") {
                             found = _arguments[criteriaIndex](this, item, index);
                         } else if (typeof _arguments[criteriaIndex] === "string") {
