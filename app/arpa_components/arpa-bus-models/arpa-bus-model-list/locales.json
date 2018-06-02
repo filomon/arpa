@@ -2,7 +2,17 @@
   "es": {
     "page_header": "Modelos de Buses",
     "search": "Buscar",
+    "view": "Ver",
     "edit": "Editar",
-    "add": "Agregar"
+    "add": "Agregar",
+    "archived" : "Archivado",
+    "show_archived" : "Ver Modelos Archivados",
+    "description": "Descripcion Comercial",
+    "trademark": "Marca",
+    "confort": "Comodidad",
+    "floors_number": "Pisos",
+    "seats_number": "Asientos",
+    "toilet_number": "Baños",
+    "tv_number": "Televisores"
   }
 }

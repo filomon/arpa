@@ -3,6 +3,8 @@
     "error_invalid" : "Valor invalido.",
     "edit_header": "Editar Modelo de Bus",
     "add_header": "Agregar Modelo de Bus",
+    "view_header": "Ver Modelo de Bus",
+    "archive": "Archivar",
     "save": "Guardar",
     "cancel" : "Cancelar",
     "name": "Nombre",
@@ -15,6 +17,7 @@
     "tv_number" : "Numero de Baños",
     "success_add": "El modelo de bus '{name}' fue guardardo satisfactoriamente.",
     "duplicated_model_name": "El modelo de bus '{name}' ya existe.",
+    "success_archive": "El modelo de bus '{name}' fue archivado satisfactoriamente.",
     "success_edit": "El modelo de bus '{name}' fue guardardo satisfactoriamente.",
     "unsupported_action": "Esta acción no esta permitida. Contacte al administrador para mas detalle"
   }

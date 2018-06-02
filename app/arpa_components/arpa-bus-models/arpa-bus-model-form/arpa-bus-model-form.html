@@ -10,70 +10,72 @@
     <template>
         <style include="arpa-app-shared-styles"></style>
         <div class="page-content">
-            <h3>[[_getPageHeader(mode)]]</h3>
+            <h3>[[_getPageHeader(mode, busModel.archived)]]</h3>
             <div class="form-content">
                 <vaadin-form-layout>
                     <vaadin-text-field id="nameField"
-                                 value="{{busModelId}}"
-                                 error-message="{{localize('error_invalid')}}"
-                                 label="{{localize('name')}}"
-                                 char-counter="true"
-                                 maxlength="50"
-                                 required="true"
-                                 auto-validate="true"
-                                 readonly="{{isEditMode(mode)}}">
+                                       value="{{busModelId}}"
+                                       error-message="{{localize('error_invalid')}}"
+                                       label="{{localize('name')}}"
+                                       char-counter="true"
+                                       maxlength="50"
+                                       required="true"
+                                       auto-validate="true"
+                                       readonly="{{isEditMode(mode)}}">
                     </vaadin-text-field>
                     <vaadin-text-area id="descriptionField"
-                                    value="{{busModel.description}}"
-                                    error-message="{{localize('error_invalid')}}"
-                                    label="{{localize('description')}}"
-                                    char-counter="true"
-                                    maxlength="500"
-                                    required="true"
-                                    auto-validate="true">
+                                      value="{{busModel.description}}"
+                                      error-message="{{localize('error_invalid')}}"
+                                      label="{{localize('description')}}"
+                                      char-counter="true"
+                                      maxlength="500"
+                                      required="true"
+                                      auto-validate="true"
+                                      readonly="[[busModel.archived]]">
                     </vaadin-text-area>
                     <vaadin-combo-box id="trademarkField"
                                       error-message="{{localize('error_invalid')}}"
                                       label="{{localize('trademark')}}"
                                       value="{{busModel.trademark}}"
                                       items="[[trademarks]]"
-                                      required="true">
+                                      required="true"
+                                      readonly="[[busModel.archived]]">
                     </vaadin-combo-box>
                     <vaadin-combo-box id="confortField"
                                       error-message="{{localize('error_invalid')}}"
                                       label="{{localize('confort')}}"
                                       value="{{busModel.confort}}"
                                       items="[[confortTypes]]"
-                                      required>
+                                      required="true"
+                                      readonly="[[busModel.archived]]">
                     </vaadin-combo-box>
                     <vaadin-text-field id="floorsNumberField"
-                                 value="{{busModel.floorsNumber}}"
-                                 error-message="{{localize('error_invalid')}}"
-                                 label="{{localize('floors_number')}}"
-                                 readonly="true">
+                                       value="{{busModel.floorsNumber}}"
+                                       label="{{localize('floors_number')}}"
+                                       readonly="true">
                     </vaadin-text-field>
                     <vaadin-text-field id="seatsNumberField"
-                                 value="{{busModel.seatsNumber}}"
-                                 error-message="{{localize('error_invalid')}}"
-                                 label="{{localize('seats_number')}}"
-                                 readonly="true">
+                                       value="{{busModel.seatsNumber}}"
+                                       label="{{localize('seats_number')}}"
+                                       readonly="true">
                     </vaadin-text-field>
                     <vaadin-text-field id="toiletNumberField"
-                                 value="{{busModel.toiletNumber}}"
-                                 error-message="{{localize('error_invalid')}}"
-                                 label="{{localize('toilet_number')}}"
-                                 readonly="true">
+                                       value="{{busModel.toiletNumber}}"
+                                       label="{{localize('toilet_number')}}"
+                                       readonly="true">
                     </vaadin-text-field>
                     <vaadin-text-field id="tvNumberField"
-                                 value="{{busModel.tvNumber}}"
-                                 error-message="{{localize('error_invalid')}}"
-                                 label="{{localize('tv_number')}}"
-                                 readonly="true">
+                                       value="{{busModel.tvNumber}}"
+                                       label="{{localize('tv_number')}}"
+                                       readonly="true">
                     </vaadin-text-field>
                 </vaadin-form-layout>
             </div>
             <div class="page-buttons">
-                <paper-button raised on-tap="save" hidden$="[[isNoneMode(mode)]]">{{localize('save')}}</paper-button>
+                <paper-button raised on-tap="archive" class="orange" hidden$="[[_hideArchiveAction(mode, busModel.archived)]]">
+                    {{localize('archive')}}
+                </paper-button>
+                <paper-button raised on-tap="save" hidden$="[[_hideSaveAction(mode, busModel.archived)]]">{{localize('save')}}</paper-button>
                 <paper-button raised on-tap="cancel" hidden$="[[isNoneMode(mode)]]">{{localize('cancel')}}</paper-button>
             </div>
         </div>
@@ -91,8 +93,15 @@
                 busModel: {
                     type: Object,
                     value: {
-                        title: null,
-                        body: null
+                        description: "",
+                        trademark: "",
+                        confort: "",
+                        floorsNumber: 0,
+                        seatsNumber: 0,
+                        toiletNumber: 0,
+                        tvNumber: 0,
+                        archived: false,
+                        _internalKey: null
                     },
                     notify: true
                 },
@@ -102,14 +111,48 @@
                 },
                 confortTypes: {
                     type: Array,
-                    value: ["Normal", "Cama", "Suite Cama"]
+                    value: ["Normal", "Semicama", "Cama", "Cama Ejecutivo", "Cama Ejecutivo C/servicio"]
+
                 }
             },
 
             behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages, Polymer.ArpaForms, Polymer.ArpaQueries, Polymer.ArpaCollections],
 
-            _getPageHeader: function (_mode) {
-                return this.isEditMode(_mode) ? this.localize('edit_header') : this.isAddMode(_mode) ? this.localize('add_header') : "";
+            /**
+             * Defines if Archive button is not visible.
+             *
+             * @param _mode The current mode value.
+             * @param _archived  The current archived value.
+             * @returns {boolean}
+             * @private
+             */
+            _hideArchiveAction: function (_mode, _archived) {
+                return _archived || !this.isEditMode(_mode);
+            },
+
+            /**
+             * Defines if Save button is not visible.
+             *
+             * @param _mode The current mode value.
+             * @param _archived  The current archived value.
+             * @returns {boolean}
+             * @private
+             */
+            _hideSaveAction: function (_mode, _archived) {
+                return _archived || this.isNoneMode(_mode);
+            },
+
+            /**
+             * Returns the page header label based on "mode" and "archived" parameters;
+             *
+             * @param _mode The current mode value.
+             * @param _archived  The current archived value.
+             * @returns {string}
+             * @private
+             */
+            _getPageHeader: function (_mode, _archived) {
+                var labelKey = _archived ? "view_header" : (this.isEditMode(_mode) ? "edit_header" : (this.isAddMode(_mode) ? "add_header" : "view_header"));
+                return this.localize(labelKey);
             },
 
             _loadFormData: function () {
@@ -129,7 +172,6 @@
             setup: function (_mode, _busModel) {
                 this.mode = _mode;
                 //Setup default values
-                console.log("busModel", this.busModel);
                 this.busModelId = null;
                 if (this.isNoneMode(this.mode)) {
                     this.busModel = null;
@@ -138,19 +180,22 @@
                         this.busModelId = _busModel.$id;
                         this.busModel = this.toEditableObject(_busModel);
                         this.setPropertiesFromEntity("busModel", ["description", "trademark", "confort",
-                                                                  "floorsNumber", "seatsNumber", "toiletNumber",
-                                                                  "tvNumber"]);
+                            "floorsNumber", "seatsNumber", "toiletNumber",
+                            "tvNumber", "archived", "_internalKey"]);
                         this.clearFieldsValidation(["nameField", "descriptionField", "trademarkField", "confortField"], false);
                     }.bind(this));
                 } else if (this.isAddMode(this.mode)) {
                     this._loadFormData().then(function (data) {
                         this.busModelId = null;
-                        this.busModel = {description: "", trademark: "", confort: "",
-                                         floorsNumber: 0, seatsNumber: 0, toiletNumber: 0, tvNumber: 0};
+                        this.busModel = {
+                            description: "", trademark: "", confort: "",
+                            floorsNumber: 0, seatsNumber: 0, toiletNumber: 0,
+                            tvNumber: 0, archived: false, _internalKey: this.generateUUID("bus_model")
+                        };
                         //Createting the accessing of every property of busModel json
                         this.setPropertiesFromEntity("busModel", ["description", "trademark", "confort",
-                                                                  "floorsNumber", "seatsNumber", "toiletNumber",
-                                                                  "tvNumber"]);
+                            "floorsNumber", "seatsNumber", "toiletNumber",
+                            "tvNumber", "archived", "_internalKey"]);
                         //Cleared out every field in the form listed below.
                         this.clearFieldsValidation(["nameField", "descriptionField", "trademarkField", "confortField"], true);
                     }.bind(this));
@@ -158,23 +203,39 @@
                 return Promise.resolve();
             },
 
+            /**
+             * Modifies busModel.archived property to false.
+             *
+             * @param _event The current event.
+             */
+            archive: function (_event) {
+                firebaseApp.database().ref(this.recordPath).child("archived")
+                    .transaction(function (archived) {
+                        this.set("busModel.archived", true);
+                        return true;
+                    }.bind(this))
+                    .then(function (data) {
+                        this.showSuccessMessage(this.localize("success_archive", "name", this.busModelId));
+                    }.bind(this));
+            },
+
             save: function (_event) {
                 //Validate input fields
                 if (this.performFieldsValidation(["nameField", "descriptionField", "trademarkField", "confortField"])) {
                     //Set busModel properties from UI
                     this.pushPropertiesToEntity("busModel", ["description", "trademark", "confort",
-                                                             "floorsNumber", "seatsNumber", "toiletNumber",
-                                                             "tvNumber"]);
+                        "floorsNumber", "seatsNumber", "toiletNumber",
+                        "tvNumber", "archived", "_internalKey"]);
                     if (this.isAddMode(this.mode)) {
                         this._validateUniqueModelName().then(function (data) {
-                          if (data) {
-                            var recordRef = firebaseApp.database().ref(this.recordPath);
-                            var result = recordRef.set(this.busModel);
-                            this.showSuccessMessage(this.localize("success_add", "name", this.busModelId));
-                            this.fire('change-view', {mode: "NONE", busModel: null, view: "list"});
-                          } else {
-                              this.showErrorMessage(this.localize("duplicated_model_name", "name", this.busModelId));
-                          }
+                            if (data) {
+                                var recordRef = firebaseApp.database().ref(this.recordPath);
+                                var result = recordRef.set(this.busModel);
+                                this.showSuccessMessage(this.localize("success_add", "name", this.busModelId));
+                                this.fire('change-view', {mode: "NONE", busModel: null, view: "list"});
+                            } else {
+                                this.showErrorMessage(this.localize("duplicated_model_name", "name", this.busModelId));
+                            }
                         }.bind(this));
                     } else if (this.isEditMode(this.mode)) {
                         var recordRef = firebaseApp.database().ref(this.recordPath);
