@@ -180,6 +180,7 @@
             _setupUserSettings: function (_user) {
                 this.set("user", _user);
                 if (_user) {
+                    //Check current user role.
                     var routesRef = firebaseApp.database().ref("/user_roles/" + this.user.uid);
                     routesRef.orderByKey().on("value", function (data) {
                         var newUser = JSON.parse(JSON.stringify(this.user));
@@ -187,6 +188,7 @@
                             newUser.role = data.val().role;
                             this.set("user", newUser);
                         } else {
+                            //Setup default role if user does not have a role.
                             newUser.role = "GUEST";
                             this.set("user", newUser);
                             var newUserRole = {
