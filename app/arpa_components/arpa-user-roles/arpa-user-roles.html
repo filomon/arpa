@@ -1,0 +1,143 @@
+<link rel="import" href="../arpa-app-elements/arpa-common-elements.html">
+<link rel="import" href="../../bower_components/vaadin-grid/all-imports.html">
+<link rel="import" href="../../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
+
+<dom-module id="arpa-user-roles">
+    <template>
+        <style include="arpa-app-shared-styles"></style>
+        <div class="page-content">
+            <div class="page-header">
+                <div class="page-header-left">
+                    <h3>{{localize('page_header')}}</h3>
+                    <span class="text-info">
+                        <iron-icon icon="icons:info"></iron-icon>
+                        {{localize('message_info')}}
+                    </span>
+                </div>
+                <div class="page-header-right">
+                </div>
+            </div>
+            <vaadin-grid theme="row-dividers" items="{{userRoles}}" class="data-table-grid"
+                         column-reordering-allowed multi-sort height-by-rows>
+
+                <vaadin-grid-column width="35%">
+                    <template class="header">
+                        <vaadin-grid-sorter path="displayName">[[localize('displayName')]]</vaadin-grid-sorter>
+                        <br/>
+                        <vaadin-grid-filter path="displayName"></vaadin-grid-filter>
+                    </template>
+                    <template>[[item.displayName]]</template>
+                </vaadin-grid-column>
+
+                <vaadin-grid-column width="35%">
+                    <template class="header">
+                        <vaadin-grid-sorter path="email">[[localize('email')]]</vaadin-grid-sorter>
+                        <br/>
+                        <vaadin-grid-filter path="email"></vaadin-grid-filter>
+                    </template>
+                    <template>[[item.email]]</template>
+                </vaadin-grid-column>
+
+                <vaadin-grid-column width="30%">
+                    <template class="header">
+                        <vaadin-grid-sorter path="localizedRole">[[localize('role')]]</vaadin-grid-sorter>
+                        <br/>
+                        <vaadin-grid-filter path="localizedRole"></vaadin-grid-filter>
+                    </template>
+                    <template>
+                        <template is="dom-if" if="{{!isRoot(item)}}">
+                            <vaadin-combo-box value="{{item.role}}" items="[[roles]]" required style="width: 100%"
+                                              item-label-path="label" item-value-path="value"></vaadin-combo-box>
+                        </template>
+                        <template is="dom-if" if="{{isRoot(item)}}">
+                            [[item.role]]
+                        </template>
+                    </template>
+                </vaadin-grid-column>
+
+            </vaadin-grid>
+
+            <div class="page-buttons">
+                <paper-button raised on-tap="save">{{localize('save')}}</paper-button>
+            </div>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: 'arpa-user-roles',
+
+            properties: {
+                userRoles: {
+                    type: Array,
+                    value: []
+                },
+                roles: {
+                    type: Array,
+                    value: null
+                }
+            },
+
+            behaviors: [Polymer.ArpaCore, Polymer.ArpaForms, Polymer.ArpaMessages, Polymer.ArpaCollections],
+
+            /**
+             * Default setup function.
+             */
+            setup: function () {
+                this.refresh();
+            },
+
+            /**
+             * Refresh Routes list that belong on current user.
+             */
+            refresh: function () {
+                if (!this.roles) {
+                    //Load roles list owth their label and value
+                    var _roles = [];
+                    var _rolesValues = ["GUEST", "COMPANY_ADMIN", "SYSTEM_ADMIN"];
+                    for (var roleIndex = 0; roleIndex < _rolesValues.length; roleIndex++) {
+                        var roleValue = _rolesValues[roleIndex];
+                        _roles.push({label: this.localize(roleValue), value: roleValue});
+                    }
+                    this.set("roles", _roles);
+                }
+                if (this.user) {
+                    var userRolesRef = firebaseApp.database().ref("/user_roles");
+                    userRolesRef.orderByKey().on("value", function (data) {
+                        var userRolesTemp = this.queryResultsToArrayObject(data.val());
+                        for (var roleIndex = 0; roleIndex < userRolesTemp.length; roleIndex++) {
+                            var userRole = userRolesTemp[roleIndex];
+                            //Add localize value for UI management.
+                            userRole.localizedRole = this.localize(userRole.role);
+                        }
+                        this.set("userRoles", userRolesTemp);
+                    }.bind(this));
+                }
+            },
+
+
+            /**
+             * Handles save action to update current roles that is being displayed.
+             *
+             * @param _event The current event.
+             * @returns {*}
+             */
+            save: function (_event) {
+                var newUserRoleData = {};
+                var _userRoles = this.cloneObject(this.userRoles);
+                //Convert persistence DB version
+                for (var roleIndex = 0; roleIndex < _userRoles.length; roleIndex++) {
+                    var userRole = _userRoles[roleIndex];
+                    var recordId = "" + userRole.$id;
+                    newUserRoleData[recordId] = this.toEditableObject(userRole);
+                }
+                //Updates user roles.
+                var userRolesRef = firebaseApp.database().ref("/user_roles");
+                userRolesRef.update(newUserRoleData).then(function (data) {
+                    this.showSuccessMessage(this.localize("success_edit"));
+                }.bind(this))
+            }
+        });
+    </script>
+</dom-module>

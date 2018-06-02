@@ -103,6 +103,22 @@
                 if (this.loadResources) {
                     this.loadResources(this.resolveUrl('locales.json'));
                 }
+            },
+
+            isRoot: function(_userRole) {
+                return _userRole.role === "ROOT";
+            },
+
+            isQuest: function(_userRole) {
+                return !_userRole || !_userRole.role || _userRole.role === "GUEST";
+            },
+
+            isCompanyAdmin: function(_userRole) {
+                return _userRole.role === "COMPANY_ADMIN";
+            },
+
+            isSystemAdmin: function(_userRole) {
+                return _userRole.role === "SYSTEM_ADMIN";
             }
         };
 

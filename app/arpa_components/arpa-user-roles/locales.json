@@ -1,0 +1,15 @@
+{
+  "es": {
+    "page_header" : "Roles de Usuario",
+    "message_info" : "Solo usuarios registrado son mostrados.",
+    "displayName" : "Nombre",
+    "email" : "Email",
+    "role" : "Rol",
+    "save" : "Guardar",
+    "GUEST": "Invitado",
+    "COMPANY_ADMIN": "Administrador de Compania",
+    "SYSTEM_ADMIN": "Administrador de Sistema",
+    "ROOT": "Root",
+    "success_edit" : "Roles de usuario guardados satisfactoriamente."
+  }
+}
