@@ -26,8 +26,6 @@
                 <template>
                     <div>
                         <div class="item" tabindex$="[[tabIndex]]">
-                            <!-- Uncomment if there is a image associated to a record -->
-                            <!--<iron-image class="logo" sizing="contain" src="[[item.logo]]"></iron-image>-->
                             <div class="pad">
                                 <div class="primary">[[busModel.$id]][[_getArchivedLabel(busModel.archived)]]</div>
                                 <div class="secondary dim">
@@ -130,6 +128,9 @@
                 return _archived ? this.localize("view") : this.localize("edit");
             },
 
+            /**
+             * Refresh and updates current BusModel list.
+             */
             refresh: function () {
                 if (this.user) {
                     var busModelsRef = firebaseApp.database().ref("/bus_models");
@@ -142,11 +143,22 @@
                 }
             },
 
+            /**
+             * Handles edit action to redirect to "form" element in "EDIT" mode.
+             *
+             * @param _event The current event.
+             * @private
+             */
             _edit: function (_event) {
-                console.log("_event", _event);
                 this.fire('change-view', {mode: "EDIT", busModel: _event.model.busModel, view: "form"});
             },
 
+            /**
+             * Handles add action to redirect to "form" element in "ADD" mode.
+             *
+             * @param _event The current event.
+             * @private
+             */
             _add: function (_event) {
                 this.fire('change-view', {mode: "ADD", busModel: null, view: "form"});
             }

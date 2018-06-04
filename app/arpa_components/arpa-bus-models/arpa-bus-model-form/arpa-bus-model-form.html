@@ -155,6 +155,11 @@
                 return this.localize(labelKey);
             },
 
+            /**
+             * Loads default information that needs to be used in the FORM.
+             *
+             * @returns {*} A Promise object to handle after it completes.
+             */
             _loadFormData: function () {
                 return firebaseApp.database().ref("/bus_trademarks").orderByKey().once("value")
                     .then(function (data) {
@@ -162,6 +167,11 @@
                     }.bind(this));
             },
 
+            /**
+             * Validates if current object name is unique.
+             *
+             * @returns {*} A Promise object to handle after it completes.
+             */
             _validateUniqueModelName: function () {
                 return firebaseApp.database().ref(this.recordPath).orderByKey().once("value")
                     .then(function (data) {
@@ -169,6 +179,13 @@
                     }.bind(this));
             },
 
+            /**
+             * Setups current form state based on _model and _busModel parameters.
+             *
+             * @param _mode The current mode value.
+             * @param _busModel The current busModel instance to be used.
+             * @returns {*} A Promise object to handle after it completes.
+             */
             setup: function (_mode, _busModel) {
                 this.mode = _mode;
                 //Setup default values
@@ -219,6 +236,12 @@
                     }.bind(this));
             },
 
+            /**
+             * Handles save action to Insert or Update current busModel object that is being displayed.
+             *
+             * @param _event The current event.
+             * @returns {*} A Promise object to handle after it completes.
+             */
             save: function (_event) {
                 //Validate input fields
                 if (this.performFieldsValidation(["nameField", "descriptionField", "trademarkField", "confortField"])) {
@@ -250,14 +273,27 @@
                 return Promise.resolve();
             },
 
+            /**
+             * Handlers cancel action to redirect to list element.
+             * @param _event  The current event.
+             */
             cancel: function (_event) {
                 this.fire('change-view', {mode: "NONE", busModel: null, view: "list"});
             },
 
+            /**
+             * Returns bus model objects root path reference.
+             *
+             * @returns {string}
+             */
             get busModelsPath() {
                 return '/bus_models';
             },
 
+            /**
+             * Returns current record path reference.
+             * @returns {string}
+             */
             get recordPath() {
                 return this.busModelsPath + "/" + this.busModelId;
             }
