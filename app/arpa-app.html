@@ -20,6 +20,7 @@
 <link rel="import" href="arpa_components/arpa-search-element/arpa-search-element.html">
 <link rel="import" href="arpa_components/arpa-company-example/arpa-mycompany-element.html">
 <link rel="import" href="arpa_components/arpa-bus-models/arpa-bus-models.html">
+<link rel="import" href="arpa_components/arpa-user-roles/arpa-user-roles.html">
 <link rel="import" href="arpa_components/arpa-routes/arpa-routes.html">
 
 <dom-module id="arpa-app">
@@ -104,14 +105,14 @@
                                             online="{{online}}"
                                             hidden$="[[!signedIn]]">
                         </arpa-notes-example>
-                        <arpa-company-element id="mycompany"
-                                              name="mycompany"
-                                              route="{{subroute}}"
-                                              user="{{user}}"
-                                              signed-in="{{signedIn}}"
-                                              online="{{online}}"
-                                              hidden$="[[!signedIn]]">
-                        </arpa-company-element>
+                        <arpa-user-roles id="userroles"
+                                         name="userroles"
+                                         route="{{subroute}}"
+                                         user="{{user}}"
+                                         signed-in="{{signedIn}}"
+                                         online="{{online}}"
+                                         hidden$="[[!signedIn]]">
+                        </arpa-user-roles>
                         <arpa-bus-models id="busmodels"
                                          name="busmodels"
                                          route="{{subroute}}"
@@ -128,6 +129,14 @@
                                      online="{{online}}"
                                      hidden$="[[!signedIn]]">
                         </arpa-routes>
+                        <arpa-company-element id="mycompany"
+                                              name="mycompany"
+                                              route="{{subroute}}"
+                                              user="{{user}}"
+                                              signed-in="{{signedIn}}"
+                                              online="{{online}}"
+                                              hidden$="[[!signedIn]]">
+                        </arpa-company-element>
                     </iron-pages>
                 </div>
             </app-drawer-layout>
@@ -165,12 +174,33 @@
             },
 
             /**
+             * Setups current user setttings.
+             *
              * @param _user The current user.
              * @private
              */
             _setupUserSettings: function (_user) {
                 this.set("user", _user);
                 if (_user) {
+                    //Check current user role.
+                    var routesRef = firebaseApp.database().ref("/user_roles/" + this.user.uid);
+                    routesRef.orderByKey().on("value", function (data) {
+                        var newUser = JSON.parse(JSON.stringify(this.user));
+                        if (data && data.val()) {
+                            newUser.role = data.val().role;
+                            this.set("user", newUser);
+                        } else {
+                            //Setup default role if user does not have a role.
+                            newUser.role = "GUEST";
+                            this.set("user", newUser);
+                            var newUserRole = {
+                                displayName: this.user.displayName,
+                                email: this.user.email,
+                                role: this.user.role
+                            };
+                            routesRef.set(newUserRole);
+                        }
+                    }.bind(this));
                     this.set("signedIn", true);
                 } else {
                     this.set("signedIn", false);
@@ -183,7 +213,7 @@
              * @param _event
              * @private
              */
-            _setupSelectedPage: function(_event) {
+            _setupSelectedPage: function (_event) {
                 var elementId = _event.currentTarget.getAttribute("value");
                 if (this.$[elementId] && this.$[elementId].setup && typeof this.$[elementId].setup === "function") {
                     this.$[elementId].setup();
@@ -192,8 +222,8 @@
 
             /**
              * Difines Lock icon value based on _signedIn parameter.
-             * 
-             * @param _signedIn The current signedIn value. 
+             *
+             * @param _signedIn The current signedIn value.
              * @return {string}
              * @private
              */
@@ -236,7 +266,7 @@
 
             /**
              * Handles drawer toggle actions.
-             * 
+             *
              * @param _event The current event.
              * @private
              */
