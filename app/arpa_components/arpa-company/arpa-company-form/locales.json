@@ -11,7 +11,7 @@
     "logo_description":"(Tamaño 350x350, peso  3K)",
     "error_invalid" : "Valor inválido.",
     "unsupported_action" : "Acción invalida.",
-    "success_add" : "La empresa '{title}' fue agregada correctamente.",
-    "success_edit" : "La empresa '{title}' fue modificada correctamente."
+    "success_add" : "La empresa '{name}' fue agregada correctamente.",
+    "success_edit" : "La empresa '{name}' fue modificada correctamente."
   }
 }
