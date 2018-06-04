@@ -8,7 +8,7 @@
     "company_name":"Razón Social",
     "description":"Descripción",
     "logo_button":"Seleccionar imagen..",
-    "logo_description":"(Tamaño 350x350, peso  3K)",
+    "logo_description":"(Tamaño 200x200, peso  3K)",
     "error_invalid" : "Valor inválido.",
     "unsupported_action" : "Acción invalida.",
     "success_add" : "La empresa '{name}' fue agregada correctamente.",
