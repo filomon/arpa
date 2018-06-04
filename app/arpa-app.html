@@ -18,7 +18,7 @@
 <link rel="import" href="arpa_components/arpa-app-elements/arpa-common-elements.html">
 <link rel="import" href="arpa_components/arpa-notes-example/arpa-notes-example.html">
 <link rel="import" href="arpa_components/arpa-search-element/arpa-search-element.html">
-<link rel="import" href="arpa_components/arpa-company-example/arpa-mycompany-element.html">
+<link rel="import" href="arpa_components/arpa-company/arpa-company.html">
 <link rel="import" href="arpa_components/arpa-bus-models/arpa-bus-models.html">
 <link rel="import" href="arpa_components/arpa-routes/arpa-routes.html">
 
@@ -79,7 +79,7 @@
                                 <iron-icon icon="maps:directions"></iron-icon>
                                 <label>{{localize('my_routes')}}</label>
                             </paper-item>
-                            <paper-item value="mycompany" on-tap="_setupSelectedPage">
+                            <paper-item value="company" on-tap="_setupSelectedPage">
                                 <iron-icon icon="communication:contacts"></iron-icon>
                                 <label>{{localize('my_company')}}</label>
                             </paper-item>
@@ -104,14 +104,14 @@
                                             online="{{online}}"
                                             hidden$="[[!signedIn]]">
                         </arpa-notes-example>
-                        <arpa-company-element id="mycompany"
-                                              name="mycompany"
+                        <arpa-company id="company"
+                                              name="company"
                                               route="{{subroute}}"
                                               user="{{user}}"
                                               signed-in="{{signedIn}}"
                                               online="{{online}}"
                                               hidden$="[[!signedIn]]">
-                        </arpa-company-element>
+                        </arpa-company>
                         <arpa-bus-models id="busmodels"
                                          name="busmodels"
                                          route="{{subroute}}"
@@ -186,6 +186,7 @@
             _setupSelectedPage: function(_event) {
                 var elementId = _event.currentTarget.getAttribute("value");
                 if (this.$[elementId] && this.$[elementId].setup && typeof this.$[elementId].setup === "function") {
+                  //  console.log("ingreso acas "+elementId._getUserName+ elementId );
                     this.$[elementId].setup();
                 }
             },
