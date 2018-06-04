@@ -2,6 +2,11 @@
 <link rel="import" href="../../../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../../../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../../../bower_components/iron-icons/maps-icons.html">
+<link rel="import" href="../../../bower_components/iron-icons/hardware-icons.html">
+<link rel="import" href="../../../bower_components/iron-icons/notification-icons.html">
 <link rel="import" href="../../arpa-app-elements/arpa-common-behaviors.html">
 
 <dom-module id="arpa-bus-model-list">
@@ -10,20 +15,59 @@
         <div class="page-content">
             <div class="page-header">
                 <h3 class="page-header-left">{{localize('page_header')}}</h3>
-                <paper-input class="page-header-right" value="{{searchText}}" label="{{localize('search')}}"/>
+                <div class="page-header-right">
+                    <paper-input value="{{searchText}}" label="{{localize('search')}}"></paper-input>
+                    <paper-checkbox checked="{{showArchived}}">{{localize('show_archived')}}</paper-checkbox>
+                </div>
             </div>
-            <iron-list id="main_list" class="data-list" items="{{filterArray(busModels, searchText, '$id', 'description')}}" as="busModel"
+            <iron-list id="main_list" class="data-list"
+                       items="{{filterArray(busModels, searchText, showArchived, _filterArchivedModels, '$id', 'description', 'trademark', 'confort')}}" as="busModel"
                        scroll-target="document">
                 <template>
                     <div>
                         <div class="item" tabindex$="[[tabIndex]]">
-                            <!-- Uncomment if there is a image associated to a record -->
-                            <!--<iron-image class="logo" sizing="contain" src="[[item.logo]]"></iron-image>-->
                             <div class="pad">
-                                <div class="primary">[[busModel.$id]]</div>
-                                <div class="secondary dim">[[busModel.description]]</div>
+                                <div class="primary">[[busModel.$id]][[_getArchivedLabel(busModel.archived)]]</div>
+                                <div class="secondary dim">
+                                    <b>{{localize('description')}}:</b> [[busModel.description]]&nbsp|&nbsp
+                                    <b>{{localize('trademark')}}:</b> [[busModel.trademark]]&nbsp|&nbsp
+                                    <b>{{localize('confort')}}:</b> [[busModel.confort]]
+                                </div>
+                                <div class="secondary dim">
+                                    <span class="icon-box">
+                                        <span title="[[localize('floors_number')]]">
+                                            <iron-icon icon="maps:directions-bus"></iron-icon>
+                                            &nbsp[[busModel.floorsNumber]]
+                                        </span>
+                                        <div class="text-info">[[localize('floors_number')]]</div>
+                                    </span>
+                                    &nbsp|&nbsp
+                                    <span class="icon-box">
+                                        <span title="[[localize('seats_number')]]">
+                                            <iron-icon icon="icons:event-seat"></iron-icon>
+                                            &nbsp[[busModel.seatsNumber]]
+                                        </span>
+                                        <div class="text-info">[[localize('seats_number')]]</div>
+                                    </span>
+                                    &nbsp|&nbsp
+                                    <span class="icon-box">
+                                        <span title="[[localize('toilet_number')]]">
+                                            <iron-icon icon="notification:wc"></iron-icon>
+                                            &nbsp[[busModel.toiletNumber]]
+                                        </span>
+                                        <div class="text-info">[[localize('toilet_number')]]</div>
+                                    </span>
+                                    &nbsp|&nbsp
+                                    <span class="icon-box">
+                                        <span title="[[localize('tv_number')]]">
+                                            <iron-icon icon="hardware:tv"></iron-icon>
+                                            &nbsp[[busModel.tvNumber]]
+                                        </span>
+                                        <div class="text-info">[[localize('tv_number')]]</div>
+                                    </span>
+                                </div>
                             </div>
-                            <paper-button on-tap="_edit">{{localize('edit')}}</paper-button>
+                            <paper-button on-tap="_edit">{{_getItemActionLabel(busModel.archived)}}</paper-button>
                         </div>
                     </div>
                 </template>
@@ -39,26 +83,82 @@
                 busModels: {
                     type: Array,
                     value: []
+                },
+                showArchived: {
+                    type: Boolean,
+                    value: false,
+                    notify: true
                 }
             },
 
             behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages, Polymer.ArpaCollections],
 
+            /**
+             * Implements a custom filter logic to use showArchived property as base filter.
+             *
+             * @param _this The object reference to handle current Polymer instance.
+             * @param item Current item that is being iterated.
+             * @param index Item current i.dex.
+             * @returns {boolean}
+             * @private
+             */
+            _filterArchivedModels: function (_this, item, index) {
+                return _this.showArchived ? true : !item.archived;
+            },
+
+            /**
+             * Returns the label "archived" or empty, based on _archived parameter.
+             *
+             * @param _archived The flag to check if current iterated item is archived.
+             * @returns {string}
+             * @private
+             */
+            _getArchivedLabel: function (_archived) {
+                return _archived ? " (" + this.localize("archived") + ")" : "";
+            },
+
+            /**
+             * Returns the label "view" or "edit", based on _archived parameter.
+             *
+             * @param _archived The flag to check if current iterated item is archived.
+             * @returns {*|{type, computed}}
+             * @private
+             */
+            _getItemActionLabel: function (_archived) {
+                return _archived ? this.localize("view") : this.localize("edit");
+            },
+
+            /**
+             * Refresh and updates current BusModel list.
+             */
             refresh: function () {
                 if (this.user) {
                     var busModelsRef = firebaseApp.database().ref("/bus_models");
                     busModelsRef.orderByKey().on("value", function (data) {
                         this.set("busModels", this.queryResultsToArrayObject(data.val()));
-                        setTimeout(function() {this.updateStyles();}.bind(this), 50);
+                        setTimeout(function () {
+                            this.updateStyles();
+                        }.bind(this), 50);
                     }.bind(this));
                 }
             },
 
+            /**
+             * Handles edit action to redirect to "form" element in "EDIT" mode.
+             *
+             * @param _event The current event.
+             * @private
+             */
             _edit: function (_event) {
-                console.log("_event", _event);
                 this.fire('change-view', {mode: "EDIT", busModel: _event.model.busModel, view: "form"});
             },
 
+            /**
+             * Handles add action to redirect to "form" element in "ADD" mode.
+             *
+             * @param _event The current event.
+             * @private
+             */
             _add: function (_event) {
                 this.fire('change-view', {mode: "ADD", busModel: null, view: "form"});
             }

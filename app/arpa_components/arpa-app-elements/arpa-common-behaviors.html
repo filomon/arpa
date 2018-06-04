@@ -106,6 +106,19 @@
             },
 
             /**
+             * Generates a random uuid
+             *
+             * @returns {string}
+             */
+            generateUUID: function (_prefix) {
+                function _p8(s) {
+                    var p = (Math.random().toString(16)+"000000000").substr(2,8);
+                    return s ? "-" + p.substr(0,4) + "-" + p.substr(4,4) : p ;
+                }
+                return (_prefix ? _prefix.toLowerCase() + "-" : "") + _p8() + _p8(true) + _p8(true) + _p8();
+            }
+
+            /**
              * Returns 'true' if current user role is ROOT.
              *
              * @param _userRole Current user role.
