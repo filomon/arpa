@@ -93,7 +93,7 @@
              */
             refresh: function () {
                 if (!this.roles) {
-                    //Load roles list owth their label and value
+                    //Load roles list with their label and value
                     var _roles = [];
                     var _rolesValues = ["GUEST", "COMPANY_ADMIN", "SYSTEM_ADMIN"];
                     for (var roleIndex = 0; roleIndex < _rolesValues.length; roleIndex++) {
@@ -118,7 +118,7 @@
 
 
             /**
-             * Handles save action to update current roles that is being displayed.
+             * Builds an user roles tree based on roleId and role settings to update them in the data base.
              *
              * @param _event The current event.
              * @returns {*}

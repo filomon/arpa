@@ -105,18 +105,42 @@
                 }
             },
 
+            /**
+             * Returns 'true' if current user role is ROOT.
+             *
+             * @param _userRole Current user role.
+             * @returns {boolean}
+             */
             isRoot: function(_userRole) {
                 return _userRole.role === "ROOT";
             },
 
+            /**
+             * Returns 'true' if current user role is empty or QUEST.
+             *
+             * @param _userRole Current user role.
+             * @returns {boolean}
+             */
             isQuest: function(_userRole) {
                 return !_userRole || !_userRole.role || _userRole.role === "GUEST";
             },
 
+            /**
+             * Returns 'true' if current user role is COMPANY_ADMIN.
+             *
+             * @param _userRole Current user role.
+             * @returns {boolean}
+             */
             isCompanyAdmin: function(_userRole) {
                 return _userRole.role === "COMPANY_ADMIN";
             },
 
+            /**
+             * Returns 'true' if current user role is SYSTEM_ADMIN.
+             *
+             * @param _userRole Current user role.
+             * @returns {boolean}
+             */
             isSystemAdmin: function(_userRole) {
                 return _userRole.role === "SYSTEM_ADMIN";
             }
