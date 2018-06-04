@@ -1,0 +1,66 @@
+<link rel="import" href="../arpa-app-elements/arpa-common-elements.html">
+<link rel="import" href="../arpa-app-elements/arpa-common-behaviors.html">
+<link rel="import" href="../../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../../bower_components/app-route/app-location.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+<link rel="import" href="arpa-company-form/arpa-company-form.html">
+
+<dom-module id="arpa-company">
+    <template>
+        <style include="arpa-app-shared-styles"></style>
+        <app-route route="{{route}}" pattern="/:view" data="{{routeData}}" tail="{{subroute}}"></app-route>
+        <iron-pages selected="{{routeData.view}}" attr-for-selected="name">
+            <arpa-company-form id="form" name="form" route="{{route}}" user="{{user}}" signed-in="{{signedIn}}" online="{{online}}" on-change-view="changeView"
+                hidden$="[[!signedIn]]">
+            </arpa-company-form>
+        </iron-pages>
+    </template>
+    <script>
+        Polymer({
+            is: 'arpa-company',
+
+            properties: {
+
+            },
+
+            observers: [
+                '_setupDefaultRoute(route)'
+            ],
+
+            behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages, Polymer.ArpaQueries, Polymer.ArpaCollections],
+            /**
+            *   Set the default view to show         
+            *   @param _route
+            */
+
+            _setupDefaultRoute: function (_route) {
+                if (!this.get("routeData.view")) {
+                    this.set("routeData.view", "form");
+                }
+            },
+
+            changeView: function (_event, _params) {
+                this.set("routeData.view", _params.view);
+            },
+            isRegistered: function () {
+                return this.getCurrentUserCompanyName().then(function (data) {
+                    var mycompany = data;
+                    console.log("mycompany:  " + mycompany);
+                    return data;
+                }.bind(this));
+                return null;
+            }
+           
+        },
+            setup: function () {
+                if (!this.isRegistered()) {
+                    this.$.form.setup("ADD", null);
+                } else {
+                    window.console("en dearrollo");
+                    this.$.form.setup("EDIT", this.$.form.refresh);
+                }
+            }
+
+        });
+    </script>
+</dom-module>

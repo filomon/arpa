@@ -1,0 +1,307 @@
+<link rel="import" href="../../arpa-app-elements/arpa-common-elements.html">
+<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../bower_components/vaadin-upload/vaadin-upload.html">
+<link rel="import" href="../../../bower_components/polymerfire/polymerfire.html">
+<script src="../../../other_component/mock.js"></script>
+<script src="../../../bower_components/firebase/firebase.js"></script>
+
+<dom-module id="arpa-company-form">
+    <template>
+        <style include="arpa-app-shared-styles"></style>
+        <div class="page-content">
+            <h3>[[_getPageHeader(mode)]]</h3>
+            <div class="form-content">
+                <paper-textarea id="companyNameField" value="{{company.name}}" label="{{localize('company_name')}}" error-message="{{localize('error_invalid')}}"
+                    char-counter="true" maxlength="255" required="true" auto-validate="true">
+                </paper-textarea>
+                <paper-textarea id="companyDescrField" value="{{company.description}}" label="{{localize('description')}}" error-message="{{localize('error_invalid')}}"
+                    char-counter="true" maxlength="500" auto-validate="true">
+                </paper-textarea>
+                <vaadin-upload id="logoupload" accept="[[accept]]" max-files="[[maxFiles]]" max-file-size="[[maxFileSize]]"></vaadin-upload>
+            </div>
+            <div class="page-buttons">
+                <paper-button raised on-tap="delete" hidden$="[[!isEditMode(mode)]]">{{localize('delete')}}</paper-button>
+                <paper-button raised on-tap="save" hidden$="[[isNoneMode(mode)]]">{{localize('save')}}</paper-button>
+            </div>
+        </div>
+    </template>
+    <script>
+        Polymer({
+            is: 'arpa-company-form',
+
+            properties: {
+            /**
+             * Set the company identifier.
+             */
+                companyId: {
+                    type: String,
+                    value: null,
+                    notify: true
+                },
+                            /**
+            /**
+             * Set the Company Object, the default values ​​with empty.
+             */
+                company: {
+                    type: Object,
+                    value: {
+                        name: "",
+                        description: "",
+                        logourl: "",
+                        owner: ""
+                    },
+                    notify: true
+                },
+                /**
+                *  Specify the name of the company logo. The default value is empty
+                */
+                imgName: {
+                    type: String,
+                    value: ''
+                },
+                /**
+                * Specify the type of image. 
+                * Syntax: image/png
+                */
+                accept: {
+                    type: String,
+                    value: 'image/png'
+                },
+
+                /**
+                 * Set the file limit. By default it is 1
+                 */
+                maxFiles: {
+                    type: Number,
+                    value: 1
+                },
+
+                /**
+                 * Specifies the size of the file in bits allowed for the default load is 3K
+                 */
+                maxFileSize: {
+                    type: Number,
+                    value: Infinity
+                },
+                /**
+                 * Specifies the directory where the uploaded files are stored, 
+                 * Default 'img/'.
+                 */
+                directory: {
+                    type: String,
+                    value: 'img/'
+                },
+                /**
+                 * Set the url of the logo stored in Firebase.
+                 */
+                url: {
+                    type: String,
+                    value: ''
+                },
+            },
+
+            behaviors: [Polymer.ArpaCore, Polymer.ArpaMessages, Polymer.ArpaForms, Polymer.ArpaQueries],
+
+            observers: [
+                //setup(mode, noteId)
+            ],
+            /**
+            * Lifecycle
+            * Loads resources when "attached" Polymer event is triggered.
+            */
+            ready: function () {
+                this.imgName = 'arpa-img-' + Math.random().toString(36).substr(2, 5).toString();
+                console.log(this.imgName);
+            },
+            attached: function () {
+                if (this.loadResources) {
+                    this.loadResources(this.resolveUrl('locales.json'));
+                    Object.getPrototypeOf(document.createElement('vaadin-upload'))._createXhr = this._uploadFile;
+                }
+            },
+            detached: function () {
+            },
+            /**
+             * Returns the page header label based on "mode":  "Add" or "Edit" parameters;
+             *
+             * @param _mode The current mode value.
+             * @returns {string}
+             * @private
+             */
+            _getPageHeader: function (_mode) {
+                return this.isEditMode(_mode) ? this.localize('edit_header') : this.isAddMode(_mode) ? this.localize('add_header') : "";
+            },
+
+            /**
+             * Setups current element states and properties value based on _mode and _company parameters.
+             *
+             * @param _mode The form mode.
+             * @param _company The company Object.
+             * @returns {*}
+             */
+            setup: function (_mode, _company) {
+                this.mode = _mode;
+                this.company = _company;
+                if (this.isNoneMode(this.mode)) {
+                    this.company = null;
+                } else if (this.isEditMode(this.mode)) {
+                    this.companyId = _company.$id;
+                    this.company = this.toEditableObject(_company);
+                    this.setPropertiesFromEntity("company", ["name", "description", "logourl", "owner"]);
+                    this.clearFieldsValidation(["companyNameField", "companyDescrField"], false);
+                } else if (this.isAddMode(this.mode)) {
+                    this.companyId = null;
+                    this.company = { name: "", description: "", logourl: "", owner: this.user.uid };
+                    this.setPropertiesFromEntity("company", ["name", "description", "logourl", "owner"]);
+                    this.clearFieldsValidation(["companyNameField", "companyDescrField"], true);
+                }
+                return Promise.resolve();
+            },
+
+            /**
+             * Save a record in the Database
+             * @param _event The current event
+             * @returns {object}
+             * @private
+             */
+            save: function (_event) {
+                if (this.performFieldsValidation(["companyNameField", "companyDescrField"])) {
+                    this.pushPropertiesToEntity("companies", ["companyNameField", "companyDescrField", this.url, this.user]);
+                    if (this.isAddMode(this.mode)/* && !isRegistered()*/) {
+                        var recordRef = firebaseApp.database().ref(this.recordPath);
+                        var result = recordRef.set(this.company);
+                        this.showSuccessMessage(this.localize("success_add", "title", this.company.name));
+                    } else if (this.isEditMode(this.mode)) {
+                        var recordRef = firebaseApp.database().ref(this.recordPath);
+                        var result = recordRef.update(this.company.name);
+                        this.showSuccessMessage(this.localize("success_edit", "title", this.company.name));
+                    } else {
+                        this.showErrorMessage(this.localize("unsupported_action"));
+                    }
+                    this.fire('change-view', { mode: "EDIT", company: null, view: "form" });
+                }
+                return Promise.resolve();
+            },
+            /** 
+             * Save a record in the Database
+             * @param _event The current event
+             * @returns {object}
+             * @private
+             */
+            cancel: function (_event) {
+                this.fire('change-view', { mode: "NONE", company: null, view: "form" });
+            },
+            /**
+            *  Setting the company Object 
+            */
+            refresh: function () {
+
+                this.company = firebaseApp.database().ref("/companies").orderByChild("owner").equalTo(this.user.uid).once("value").then(function (data) {
+                    if (data && data.val()) {
+                        var keys = this.getObjectKeys(data.val());
+                        if (keys && keys.length > 0) {
+                            console.log(keys[0].toString());
+                            return keys[0];
+                        }
+                    }
+                    return null;
+                }.bind(this));
+
+            },
+            get notesPath() {
+                return '/notes/user_' + this.user.uid;
+            },
+            /**
+            * Retorna el directorio donde se guardan los registros de la empresa
+            *
+            * @returns {string}
+            * @private
+            */
+            get companyPath() {
+                return '/companies/';
+            },
+
+            get recordPath() {
+                return this.companyPath + "/" + this.company.name;
+            },
+            /**
+            * Configura si el fomrulario es Editable
+            *
+            * @returns {string}
+            * @private
+            */
+            get isEditable() {
+                return this.online;
+            },
+            /**
+            * Muestra el UI para mostrar el progreso de carga del archivo
+            *
+            * @param file Archivo cargado
+            * @returns {object}
+            * @private
+            */
+            _uploadFile: function (file) {
+                var xhr = new MockHttpRequest();
+                xhr.upload = {};
+                var ready = false;
+                xhr.onsend = function () {
+                    var total = file && file.size || 1024,
+                        done = 0;
+
+                    function start() {
+                        setTimeout(progress, 200);
+                    }
+
+                    function progress() {
+                        xhr.upload.onprogress({
+                            total: total,
+                            loaded: done
+                        });
+                        if (!ready) {
+                            setTimeout(progress, 200);
+                            done = Math.min(total, done + 1016000);
+                        } else if (!file.abort) {
+                            if (done < total) {
+                                done = total;
+                                setTimeout(progress, 200);
+                            } else {
+                                setTimeout(finish, 200);
+                            }
+                        }
+                    }
+
+                    function finish() {
+                        xhr.receive(200, '{"message":"OK"}');
+                    }
+                    start();
+                };
+                var reader = new FileReader();
+                reader.onload = (function (f) {
+                    return function (e) {
+
+                        var blob = new Blob([e.target.result], { type: "image/png" });
+                        var storageRef = firebaseApp.storage().ref();  
+                        this.imgName = (Math.random().toString(16)+"000000000").substr(2,8)+".png";
+                        console.log(imgName);
+                      //  var uploadTask = storageRef.child('img/' + blob.name).put(blob);
+                      var uploadTask = storageRef.child('img/' + "prueba.png").put(blob.then(function (snapshot) {
+                            snapshot.ref.getDownloadURL().then(function (url) {
+                                this.logourl = url
+                                console.log('File available at', url);
+                            });
+
+                        }));
+                      
+                    };
+                })(file);
+                reader.readAsDataURL(file);               
+                Promise.resolve();
+                return xhr;
+            }
+
+        });
+
+    </script>
+</dom-module>
